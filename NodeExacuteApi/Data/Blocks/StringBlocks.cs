@@ -49,7 +49,7 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            string inputString = inputs[0] as string;
+            string inputString = inputs[0].ToString();
             if (inputString != null)
             {
                 var length = inputString.Length;

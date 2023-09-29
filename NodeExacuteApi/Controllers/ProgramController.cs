@@ -37,7 +37,8 @@ namespace NodeExacuteApi.Controllers
                 return BadRequest(new { error = "No input values provided." });
             }
 
-            // Load the program using the program key
+            //check if the api key exists
+
             CustomProgram program = new CustomProgram();
             try
             {
@@ -115,8 +116,15 @@ namespace NodeExacuteApi.Controllers
             //Create The output
             List<object> ProgramOutput = new List<object>();
 
+            bool isFirstIteration = true;
             foreach (var inputId in program.ProgramStructure.ProgramEndConnections)
             {
+                if (isFirstIteration)
+                {
+                    isFirstIteration = false;
+                    continue;
+                }
+
                 if (program.ProgramStructure.InputValues.ContainsKey(inputId.Value))
                 {
                     ProgramOutput.Add(program.ProgramStructure.InputValues[inputId.Value]);
@@ -126,7 +134,7 @@ namespace NodeExacuteApi.Controllers
                     ProgramOutput.Add(program.ProgramStructure.DirectInputValues[inputId.Value]);
                 }
             }
-            
+
             // Register the call
             var call = new Call
             {
