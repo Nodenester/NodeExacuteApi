@@ -24,7 +24,8 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            var result = inputs[0].ToString() + inputs[1].ToString();
+            string result = (inputs[0]?.ToString() ?? string.Empty) + (inputs[1]?.ToString() ?? string.Empty);
+
             programStructure.InputValues[Outputs[0].Id] = result;
             return new List<object> { result };
         }

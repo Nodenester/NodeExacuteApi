@@ -170,10 +170,10 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            Variable value = programStructure.Variables[variableid];
+            object value = programStructure.Variables[variableid].Value;
             // Return the value as output
-            programStructure.InputValues[Outputs[0].Id] = value.Value;
-            return new List<object> { value.Value };
+            programStructure.InputValues[Outputs[0].Id] = value;
+            return new List<object> { value };
         }
     }
 

@@ -6,8 +6,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 // Create the base and all functions   and write what they should do in the comments
 namespace NodeBaseApi.Version2
@@ -268,10 +270,22 @@ namespace NodeBaseApi.Version2
                     }
                     else if (blockToExecute.Block is ForLoop forLoop)
                     {
-                        List<object> list = (List<object>)InputValues[forLoop.Inputs.ToArray()[1].Id];
+                        Guid Index = blockToExecute.Inputs.ToArray()[1];
+                        List<object> list = new List<object>();
+                        try
+                        {
+                            JsonElement jsonElement = (JsonElement)InputValues[Index];
+                            string jsonString = jsonElement.GetRawText();
+                            string[] stringArray = System.Text.Json.JsonSerializer.Deserialize<string[]>(jsonString);
+                            list = stringArray.Cast<object>().ToList();
+                        }
+                        catch(Exception e)
+                        { 
+                            Console.WriteLine(e.Message);
+                        }
                         foreach (var item in list)
                         {
-                            InputValues[blockToExecute.Outputs[1]] = item;
+                            InputValues[forLoop.Outputs.ToArray()[1].Id] = item;
                             ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
                         }
                         ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
@@ -323,6 +337,14 @@ namespace NodeBaseApi.Version2
             {
                 foreach (Guid inputId in block.Inputs)
                 {
+                    foreach (ProgramBlock pb in ProgramBlocks)
+                    {
+                        // If this block has an output connected to the given input and doesn't have a trigger output
+                        if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
+                        {
+                            ExecuteBlockAndConnected(Guid.Empty, pb, sessionId);
+                        }
+                    }
                     if (InputValues.ContainsKey(inputId))
                     {
                         inputValues.Add(InputValues[inputId]);
@@ -334,31 +356,10 @@ namespace NodeBaseApi.Version2
                     }
                     else
                     {
-                        foreach (ProgramBlock pb in ProgramBlocks)
-                        {
-                            // If this block has an output connected to the given input and doesn't have a trigger output
-                            if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
-                            {
-                                ExecuteBlockAndConnected(Guid.Empty, pb, sessionId);
-                            }
-                        }
-                        if (InputValues.ContainsKey(inputId))
-                        {
-                            inputValues.Add(InputValues[inputId]);
-                        }
-                        else if (DirectInputValues.ContainsKey(block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id) && DirectInputValues[block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id].ToString() != "{}")
-                        {
-                            var index = block.Inputs.ToList().IndexOf(inputId);
-                            inputValues.Add(DirectInputValues[block.Block.Inputs[index].Id]);
-                        }
-                        else
-                        {
-                            inputValues.Add(null);
-                        }
+                        inputValues.Add(null);
                     }
                 }
             }
-
             return inputValues;
         }
     }
