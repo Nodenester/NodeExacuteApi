@@ -10,7 +10,7 @@ namespace NodeExacuteApi.Controllers
     [Route("api/[controller]")]
     public class ProgramController : ControllerBase
     {
-        DateTime Stime { get; set; } = DateTime.UtcNow;
+        DateTime Stime { get; set; } = DateTime.Now;
 
         private readonly DBConnection _dbConnection;
 
@@ -138,12 +138,12 @@ namespace NodeExacuteApi.Controllers
             // Register the call
             var call = new Call
             {
-                ProgramId = programKey.ToString(),
+                ProgramId = program.Id.ToString(),
                 ApiUserId = apiKey.ToString(),
                 Cost = program.ProgramStructure.CurrentPrizing.ToString(),
                 IsTest = isTest,
                 StartTime = Stime,
-                EndTime = DateTime.UtcNow,
+                EndTime = DateTime.Now,
                 Input = inputValues.Select(kvp => (object)kvp).ToList(),
                 Output = ProgramOutput
             };
@@ -162,69 +162,5 @@ namespace NodeExacuteApi.Controllers
             // Get the output values from the program and return them as JSON;
             return Ok(ProgramOutput);
         }
-
-        //[HttpPost("execute/{apiKey}")]
-        //public async Task<ActionResult> ExecuteProgramAsync(Guid apiKey, [FromBody] Dictionary<Guid, object> inputValues, [FromQuery] Guid? sessionId = null)
-        //{
-        //    // Load the program using the API key
-        //    var program = await _dbConnection.LoadProgramAsyncApi(apiKey);
-
-        //    if (program == null || program.ProgramStructure == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    Session session = null;
-
-        //    if (sessionId.HasValue)
-        //    {
-        //        session = await _dbConnection.GetSessionAsync(sessionId.Value);
-
-        //        if (session == null)
-        //        {
-        //            // Check if the program supports sessions
-        //            if (program.SupportsSessions)
-        //            {
-        //                // Create a new session and store it in the database
-        //                session = new Session { SessionId = Guid.NewGuid(), Variables = JsonConvert.SerializeObject(new Dictionary<Guid, object>()) };
-        //                await _dbConnection.CreateSessionAsync(session);
-
-        //                // Set the session variables in the program structure
-        //                var sessionVariables = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(session.Variables);
-        //                program.ProgramStructure.SetSessionVariables(sessionVariables);
-        //            }
-        //            else
-        //            {
-        //                return BadRequest("Session not found and the program does not support sessions.");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            var sessionVariables = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(session.Variables);
-        //            program.ProgramStructure.SetSessionVariables(sessionVariables);
-        //        }
-        //    }
-
-        //    // Set the input values for the program
-        //    foreach (var kvp in inputValues)
-        //    {
-        //        program.ProgramStructure.SetInputValue(program.ProgramStructure.ProgramStart.FindIndex(output => output.Id == kvp.Key), kvp.Value);
-        //    }
-
-        //    // Execute the program
-        //    program.ProgramStructure.ExecuteProgram();
-
-        //    // If the session is not null, update the session variables in the database
-        //    if (session != null)
-        //    {
-        //        var updatedSessionVariables = program.ProgramStructure.GetSessionVariables();
-        //        session.Variables = JsonConvert.SerializeObject(updatedSessionVariables);
-        //        await _dbConnection.UpdateSessionAsync(session);
-        //    }
-
-        //    // Get the output values from the program and return them as JSON
-        //    var outputValues = program.ProgramStructure.OutputValues.ToDictionary(kvp => kvp.Key.ToString(), kvp => kvp.Value);
-        //    return Ok(outputValues);
-        //}
     }
 }

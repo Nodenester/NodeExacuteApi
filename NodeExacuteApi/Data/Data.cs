@@ -49,7 +49,7 @@ namespace NodeBaseApi.Version2
         public float zoom { get; set; } = 1;
 
         public int MaxPrice { get; set; } = 100;
-        public int CurrentPrizing { get; set; } = 10;
+        public int CurrentPrizing { get; set; } = 50;
 
         public Tuple<double, double> CameraPos { get; set; } = new Tuple<double, double>(0, 0);
         public Dictionary<Guid, object> InputValues { get; set; } = new Dictionary<Guid, object>();
