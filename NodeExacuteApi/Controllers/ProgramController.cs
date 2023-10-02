@@ -10,7 +10,7 @@ namespace NodeExacuteApi.Controllers
     [Route("api/[controller]")]
     public class ProgramController : ControllerBase
     {
-        DateTime Stime { get; set; } = DateTime.Now;
+        DateTime Stime { get; set; } = DateTime.UtcNow;
 
         private readonly DBConnection _dbConnection;
 
@@ -143,7 +143,7 @@ namespace NodeExacuteApi.Controllers
                 Cost = program.ProgramStructure.CurrentPrizing.ToString(),
                 IsTest = isTest,
                 StartTime = Stime,
-                EndTime = DateTime.Now,
+                EndTime = DateTime.UtcNow,
                 Input = inputValues.Select(kvp => (object)kvp).ToList(),
                 Output = ProgramOutput
             };
