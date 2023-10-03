@@ -193,7 +193,7 @@ namespace NodeExacuteApi.Data.Blocks
         public CustomBlock()
         {
             Id = Guid.NewGuid();
-            Name = "Block with Sub-Program";
+            Name = "Custom Block";
             Description = "A block that contains a sub-program";
             Inputs = new List<Input>();
             Outputs = new List<Output>();
