@@ -205,6 +205,8 @@ namespace NodeExacuteApi.Data.Blocks
             Session session = null;
             Guid guidSessionId;
 
+            CustomBlockProgram program = programStructure.CustomPrograms[variableid];
+
             if (!string.IsNullOrEmpty(sessionId) && Guid.TryParse(sessionId, out guidSessionId))
             {
                 session = db.GetSessionAsync(guidSessionId).GetAwaiter().GetResult();
@@ -237,26 +239,48 @@ namespace NodeExacuteApi.Data.Blocks
             // Set input values for the program based on the inputs to this block
             for (int i = 0; i < inputs.Count; i++)
             {
-                programStructure.SetInputValue(i, inputs[i]);
+                program.ProgramStructure.SetInputValue(i, inputs[i]);
             }
 
             // Execute the program
-            programStructure.ExecuteProgram(sessionId);
+            program.ProgramStructure.ExecuteProgram(sessionId);
 
             // Update the session variables if session is not null
             if (session != null)
             {
-                var updatedSessionVariables = programStructure.GetSessionVariables();
+                var updatedSessionVariables = program.ProgramStructure.GetSessionVariables();
                 session.Variables = JsonConvert.SerializeObject(updatedSessionVariables);
                 db.UpdateSessionAsync(session).GetAwaiter().GetResult();
             }
 
-            // Get the output value from the program
-            object outputValue = programStructure.GetOutputValue(0);
+            //Create The output
+            List<object> ProgramOutput = new List<object>();
 
-            return new List<object> { outputValue };
+            bool isFirstIteration = true;
+            foreach (var inputId in program.ProgramStructure.ProgramEndConnections)
+            {
+                if (isFirstIteration)
+                {
+                    isFirstIteration = false;
+                    continue;
+                }
+
+                if (program.ProgramStructure.InputValues.ContainsKey(inputId.Value))
+                {
+                    ProgramOutput.Add(program.ProgramStructure.InputValues[inputId.Value]);
+                }
+                else if (program.ProgramStructure.DirectInputValues.ContainsKey(inputId.Value))
+                {
+                    ProgramOutput.Add(program.ProgramStructure.DirectInputValues[inputId.Value]);
+                }
+            }
+
+            foreach(var output in ProgramOutput)
+            {
+                programStructure.InputValues[Outputs[ProgramOutput.IndexOf(output) + 1].Id] = output;
+            }
+
+            return new List<object> { ProgramOutput };
         }
-
-
     }
 }

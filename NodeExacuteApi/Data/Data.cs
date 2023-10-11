@@ -54,7 +54,7 @@ namespace NodeBaseApi.Version2
         public Tuple<double, double> CameraPos { get; set; } = new Tuple<double, double>(0, 0);
         public Dictionary<Guid, object> InputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> OutputValues { get; set; } = new Dictionary<Guid, object>();
-        public Dictionary<Guid, CustomProgram> CustomPrograms { get; set; } = new Dictionary<Guid, CustomProgram>();
+        public Dictionary<Guid, CustomBlockProgram> CustomPrograms { get; set; } = new Dictionary<Guid, CustomBlockProgram>();
         public Dictionary<Guid, object> BlockOutputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> DirectInputValues { get; set; } = new Dictionary<Guid, object>();
 
@@ -172,7 +172,7 @@ namespace NodeBaseApi.Version2
 
             return sessionVariables;
         }
-        public void AddCustomProgram(CustomProgram customProgram)
+        public void AddCustomProgram(CustomBlockProgram customProgram)
         {
             if (CustomPrograms.ContainsKey(customProgram.Id))
             {
@@ -180,16 +180,6 @@ namespace NodeBaseApi.Version2
             }
 
             CustomPrograms[customProgram.Id] = customProgram;
-        }
-
-        public CustomProgram GetCustomProgram(Guid customProgramId)
-        {
-            if (!CustomPrograms.TryGetValue(customProgramId, out CustomProgram customProgram))
-            {
-                throw new KeyNotFoundException("The specified custom program was not found.");
-            }
-
-            return customProgram;
         }
 
         public void ExecuteProgram(string sessionId)
@@ -245,85 +235,77 @@ namespace NodeBaseApi.Version2
 
             if (blockToExecute != null)
             {
-                // please make this work in some way, i dont know how but i somehow need the customprogram id here and     this is what you should fix
-                if (blockToExecute.CustomProgramId != Guid.Empty)
+
+                // Get the input values for the block and execute it
+                List<object> inputValues = GetInputValuesForBlock(blockToExecute, sessionId);
+                List<object> outputValues = blockToExecute.Block.Execute(inputValues, this, sessionId, blockToExecute.VariableId);
+
+                // Check for loop and conditional blocks
+                if (blockToExecute.Block is IndexLoop indexLoop)
                 {
-                    CustomProgram customProgram = GetCustomProgram(blockToExecute.CustomProgramId);
-                    customProgram.ProgramStructure.ExecuteProgram(sessionId);
+                    int loopCount = (int)InputValues[indexLoop.Inputs.ToArray()[1].Id];
+                    for (int i = 0; i < loopCount; i++)
+                    {
+                        InputValues[blockToExecute.Outputs[1]] = i;
+                        ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[0].Id, null, sessionId);
+                    }
+                    ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[2].Id, null, sessionId);
                 }
-                else
+                else if (blockToExecute.Block is ForLoop forLoop)
                 {
-                    // Get the input values for the block and execute it
-                    List<object> inputValues = GetInputValuesForBlock(blockToExecute, sessionId);
-                    List<object> outputValues = blockToExecute.Block.Execute(inputValues, this, sessionId, blockToExecute.VariableId);
-
-                    // Check for loop and conditional blocks
-                    if (blockToExecute.Block is IndexLoop indexLoop)
+                    Guid Index = blockToExecute.Inputs.ToArray()[1];
+                    List<object> list = new List<object>();
+                    try
                     {
-                        int loopCount = (int)InputValues[indexLoop.Inputs.ToArray()[1].Id];
-                        for (int i = 0; i < loopCount; i++)
-                        {
-                            InputValues[blockToExecute.Outputs[1]] = i;
-                            ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[0].Id, null, sessionId);
-                        }
-                        ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                        JsonElement jsonElement = (JsonElement)InputValues[Index];
+                        string jsonString = jsonElement.GetRawText();
+                        string[] stringArray = System.Text.Json.JsonSerializer.Deserialize<string[]>(jsonString);
+                        list = stringArray.Cast<object>().ToList();
                     }
-                    else if (blockToExecute.Block is ForLoop forLoop)
-                    {
-                        Guid Index = blockToExecute.Inputs.ToArray()[1];
-                        List<object> list = new List<object>();
-                        try
-                        {
-                            JsonElement jsonElement = (JsonElement)InputValues[Index];
-                            string jsonString = jsonElement.GetRawText();
-                            string[] stringArray = System.Text.Json.JsonSerializer.Deserialize<string[]>(jsonString);
-                            list = stringArray.Cast<object>().ToList();
-                        }
-                        catch(Exception e)
-                        { 
-                            Console.WriteLine(e.Message);
-                        }
-                        foreach (var item in list)
-                        {
-                            InputValues[forLoop.Outputs.ToArray()[1].Id] = item;
-                            ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
-                        }
-                        ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    catch(Exception e)
+                    { 
+                        Console.WriteLine(e.Message);
                     }
-                    else if (blockToExecute.Block is WhileLoop whileLoop)
+                    foreach (var item in list)
                     {
-                        bool condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
-                        while (condition)
-                        {
-                            ExecuteBlockAndConnected(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
-                            condition = (bool)InputValues[whileLoop.Inputs.ToArray()[1].Id];
-                        }
+                        InputValues[forLoop.Outputs.ToArray()[1].Id] = item;
+                        ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
+                    }
+                    ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                }
+                else if (blockToExecute.Block is WhileLoop whileLoop)
+                {
+                    bool condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
+                    while (condition)
+                    {
                         ExecuteBlockAndConnected(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                        condition = (bool)InputValues[whileLoop.Inputs.ToArray()[1].Id];
                     }
-                    else if (blockToExecute.Block is IfBlock ifBlock)
-                    {
-                        // Execute the appropriate branch based on the condition
-                        bool condition = bool.Parse(inputValues[1].ToString());
+                    ExecuteBlockAndConnected(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                }
+                else if (blockToExecute.Block is IfBlock ifBlock)
+                {
+                    // Execute the appropriate branch based on the condition
+                    bool condition = bool.Parse(inputValues[1].ToString());
 
-                        if (condition)
-                        {
-                            ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[0].Id, null, sessionId);
-                        }
-                        else
-                        {
-                            ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
-                        }
-                    }
-
-                    //Get Next Block to exacute
-                    if (blockToExecute.Block.Outputs[0].Type == Type.Trigger)
+                    if (condition)
                     {
-                        ExecuteBlockAndConnected(blockToExecute.Block.Outputs[0].Id, null, sessionId);
+                        ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[0].Id, null, sessionId);
                     }
                     else
                     {
-                        return;
+                        ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
                     }
+                }
+
+                //Get Next Block to exacute
+                if (blockToExecute.Block.Outputs[0].Type == Type.Trigger)
+                {
+                    ExecuteBlockAndConnected(blockToExecute.Block.Outputs[0].Id, null, sessionId);
+                }
+                else
+                {
+                    return;
                 }
             }
         }
