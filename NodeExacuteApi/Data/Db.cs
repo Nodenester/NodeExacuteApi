@@ -73,6 +73,20 @@ namespace NodeBaseApi.Version2
                 await connection.ExecuteAsync(query, parameters);
             }
         }
+        public async Task<bool> ApiKeyExistsAsync(string apiKey)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                SELECT COUNT(1)
+                FROM Ludde.programs
+                WHERE ApiKey = @ApiKey;
+            ";
+
+                var count = await connection.ExecuteScalarAsync<int>(query, new { ApiKey = apiKey });
+                return count > 0;
+            }
+        }
 
         //Session stuff
         public async Task<Guid> CreateSessionAsync(Session session)
@@ -129,7 +143,6 @@ namespace NodeBaseApi.Version2
                 return await connection.QuerySingleOrDefaultAsync<Guid>(query, new { ApiKey });
             }
         }
-
         public async Task<int> GetUserTokensAsync(Guid identifier, bool isApiKey = true)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -157,7 +170,6 @@ namespace NodeBaseApi.Version2
                 return await connection.QuerySingleOrDefaultAsync<int>(tokensQuery, new { UserId = identifier });
             }
         }
-
         public async Task UpdateUserTokensAsync(Guid identifier, int tokens, bool isApiKey = true)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -185,7 +197,6 @@ namespace NodeBaseApi.Version2
                 await connection.ExecuteAsync(updateTokensQuery, new { UserId = identifier, Tokens = tokens });
             }
         }
-
     }
 }
  

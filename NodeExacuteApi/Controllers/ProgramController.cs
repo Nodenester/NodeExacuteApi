@@ -38,6 +38,16 @@ namespace NodeExacuteApi.Controllers
             }
 
             //check if the api key exists
+            if (!isTest && !await _dbConnection.ApiKeyExistsAsync(apiKey.ToString()))
+            {
+                return BadRequest(new { error = "Invalid API key." });
+            }
+
+            int maxPrice = await _dbConnection.GetUserTokensAsync(apiKey, !isTest);
+            if(maxPrice < 50)
+            {
+                return BadRequest(new { error = "Not enough tokens." });
+            }
 
             CustomProgram program = new CustomProgram();
             try
@@ -48,13 +58,12 @@ namespace NodeExacuteApi.Controllers
             {
                 return NotFound(new { error =  $"Program not found.{ex.Message}"});
             }
-
             if (program == null || program.ProgramStructure == null)
             {
                 return NotFound(new { error = "Program not found 2." });
             }
 
-            program.ProgramStructure.MaxPrice = await _dbConnection.GetUserTokensAsync(apiKey, !isTest);
+            program.ProgramStructure.MaxPrice = maxPrice;
 
             Session session = null;
 
