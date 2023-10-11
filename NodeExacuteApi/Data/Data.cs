@@ -364,7 +364,6 @@ namespace NodeBaseApi.Version2
         public Block Block;
         public List<Guid> Inputs = new List<Guid>();
         public List<Guid> Outputs = new List<Guid>();
-        public Guid CustomProgramId{ get; set; }
         public Guid VariableId{ get; set; }
         public int X;
         public int Y;
