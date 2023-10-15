@@ -238,7 +238,7 @@ namespace NodeBaseApi.Version2
 
                 // Get the input values for the block and execute it
                 List<object> inputValues = GetInputValuesForBlock(blockToExecute, sessionId);
-                List<object> outputValues = blockToExecute.Block.Execute(inputValues, this, sessionId, blockToExecute.VariableId);
+                List<object> outputValues = blockToExecute.Block.ExecuteAsync(inputValues, this, sessionId, blockToExecute.VariableId);
 
                 // Check for loop and conditional blocks
                 if (blockToExecute.Block is IndexLoop indexLoop)
@@ -355,7 +355,7 @@ namespace NodeBaseApi.Version2
         public List<Input> Inputs;
         public List<Output> Outputs;
 
-        public abstract List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid);
+        public abstract List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid);
     }
 
     public class ProgramBlock

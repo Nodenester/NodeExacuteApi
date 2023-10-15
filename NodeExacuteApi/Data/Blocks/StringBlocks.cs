@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NodeBaseApi.Version2;
+using System.Text.RegularExpressions;
 using Type = NodeBaseApi.Version2.Type;
 
 namespace NodeExacuteApi.Data.Blocks
@@ -22,7 +23,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             string result = (inputs[0]?.ToString() ?? string.Empty) + (inputs[1]?.ToString() ?? string.Empty);
 
@@ -48,7 +49,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             string inputString = inputs[0].ToString();
             if (inputString != null)
@@ -84,7 +85,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var substring = ((string)inputs[0]).Substring((int)inputs[1], (int)inputs[2]);
             programStructure.InputValues[Outputs[0].Id] = substring;
@@ -109,7 +110,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var result = ((string)inputs[0]).ToLower();
             programStructure.InputValues[Outputs[0].Id] = result;
@@ -134,7 +135,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var result = ((string)inputs[0]).ToUpper();
             programStructure.InputValues[Outputs[0].Id] = result;
@@ -160,11 +161,200 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var contains = inputs[0].ToString().Contains(inputs[1].ToString());
             programStructure.InputValues[Outputs[0].Id] = contains;
             return new List<object> { contains };
+        }
+    }
+
+    // new ones
+    public class Split : Block
+    {
+        public Split()
+        {
+            Id = Guid.NewGuid();
+            Name = "Split";
+            Description = "A block that splits a string into an array of substrings based on a specified delimiter.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Delimiter", Description = "The delimiter.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Substrings", Description = "The array of substrings.", Type = Type.String, IsList = true }
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var substrings = inputs[0].ToString().Split(new string[] { inputs[1].ToString() }, StringSplitOptions.None).ToList();
+            programStructure.InputValues[Outputs[0].Id] = substrings;
+            return new List<object> { substrings };
+        }
+    }
+
+    public class Join : Block
+    {
+        public Join()
+        {
+            Id = Guid.NewGuid();
+            Name = "Join";
+            Description = "A block that concatenates an array of strings into a single string with a specified separator.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Array of Strings", Description = "The array of strings.", Type = Type.String, IsRequired = true, IsList = true },
+        new Input { Id = Guid.NewGuid(), Name = "Separator", Description = "The separator.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Resultant String", Description = "The concatenated string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var strings = ((List<object>)inputs[0]).ConvertAll(input => input.ToString());
+            var resultantString = string.Join(inputs[1].ToString(), strings);
+            programStructure.InputValues[Outputs[0].Id] = resultantString;
+            return new List<object> { resultantString };
+        }
+    }
+
+    public class Replace : Block
+    {
+        public Replace()
+        {
+            Id = Guid.NewGuid();
+            Name = "Replace";
+            Description = "A block that replaces occurrences of a specified substring with another substring.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Search String", Description = "The substring to replace.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Replacement String", Description = "The replacement string.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Resultant String", Description = "The resultant string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var resultantString = inputs[0].ToString().Replace(inputs[1].ToString(), inputs[2].ToString());
+            programStructure.InputValues[Outputs[0].Id] = resultantString;
+            return new List<object> { resultantString };
+        }
+    }
+
+    public class Trim : Block
+    {
+        public Trim()
+        {
+            Id = Guid.NewGuid();
+            Name = "Trim";
+            Description = "A block that removes all leading and trailing white-space characters from the current string.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Trimmed String", Description = "The trimmed string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var trimmedString = inputs[0].ToString().Trim();
+            programStructure.InputValues[Outputs[0].Id] = trimmedString;
+            return new List<object> { trimmedString };
+        }
+    }
+
+    public class IndexOf : Block
+    {
+        public IndexOf()
+        {
+            Id = Guid.NewGuid();
+            Name = "IndexOf";
+            Description = "A block that returns the index of the first occurrence of a specified substring.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Search String", Description = "The substring to search for.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Index", Description = "The index of the first occurrence.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var index = inputs[0].ToString().IndexOf(inputs[1].ToString());
+            programStructure.InputValues[Outputs[0].Id] = index;
+            return new List<object> { index };
+        }
+    }
+
+    public class RegularExpressionMatch : Block
+    {
+        public RegularExpressionMatch()
+        {
+            Id = Guid.NewGuid();
+            Name = "RegularExpressionMatch";
+            Description = "A block that checks if a string matches a specified regular expression pattern.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Regular Expression", Description = "The regular expression.", Type = Type.String, IsRequired = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Match Result", Description = "Whether the string matches the pattern.", Type = Type.Boolean },
+            new Output { Id = Guid.NewGuid(), Name = "Matched Groups", Description = "The groups matched by the regular expression.", Type = Type.String, IsList = true }
+        };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var match = Regex.Match(inputs[0].ToString(), inputs[1].ToString());
+            var matchResult = match.Success;
+            var matchedGroups = match.Groups.Cast<Group>().Select(g => g.Value).ToList();
+            programStructure.InputValues[Outputs[0].Id] = matchResult;
+            programStructure.InputValues[Outputs[1].Id] = matchedGroups;
+            return new List<object> { matchResult, matchedGroups };
+        }
+    }
+
+    public class Format : Block
+    {
+        public Format()
+        {
+            Id = Guid.NewGuid();
+            Name = "Format";
+            Description = "A block that replaces the format items in a specified string with the string representation of specified objects.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Format String", Description = "The format string.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Arguments", Description = "The arguments.", Type = Type.String, IsRequired = true, IsList = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Formatted String", Description = "The formatted string.", Type = Type.String }
+        };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var args = ((List<object>)inputs[1]).ToArray();
+            var formattedString = string.Format(inputs[0].ToString(), args);
+            programStructure.InputValues[Outputs[0].Id] = formattedString;
+            return new List<object> { formattedString };
         }
     }
 
