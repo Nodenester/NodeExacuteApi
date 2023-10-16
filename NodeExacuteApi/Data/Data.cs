@@ -297,6 +297,24 @@ namespace NodeBaseApi.Version2
                         ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
                     }
                 }
+                else if (blockToExecute.Block is SwitchBlock switchBlock)
+                {
+                    // Assuming the trigger input is at index 0 and the selector input is at index 1.
+                    if (InputValues[switchBlock.Inputs.ToArray()[0].Id] != null) // Check if the trigger input is not null
+                    {
+                        int selector = Convert.ToInt32(InputValues[switchBlock.Inputs.ToArray()[1].Id]);
+
+                        // The default output is at index 0. 
+                        if (selector > 0 && selector < switchBlock.Outputs.Count())
+                        {
+                            ExecuteBlockAndConnected(switchBlock.Outputs.ToArray()[selector].Id, null, sessionId);
+                        }
+                        else
+                        {
+                            ExecuteBlockAndConnected(switchBlock.Outputs.First().Id, null, sessionId); // Default case
+                        }
+                    }
+                }
 
                 //Get Next Block to exacute
                 if (blockToExecute.Block.Outputs[0].Type == Type.Trigger)

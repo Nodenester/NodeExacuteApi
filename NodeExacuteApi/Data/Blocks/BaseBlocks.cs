@@ -212,6 +212,34 @@ namespace NodeExacuteApi.Data.Blocks
             return new List<object> { selectedInput };
         }
     }
+    public class SwitchBlock : Block
+    {
+        public SwitchBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "Switch Block";
+            Description = "Triggers different outputs based on a selector value.";
+
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Trigger", Description = "The trigger input for starting the switch", Type = Type.Trigger, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Selector", Description = "The value to be checked.", Type = Type.Number, IsRequired = true }
+    };
+
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "DefaultOutput", Description = "The default output if no cases match.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "OutputCase1", Description = "Triggered for case 1.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "OutputCase2", Description = "Triggered for case 2.", Type = Type.Trigger },
+    };
+        }
+
+        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            return new List<object>();
+        }
+    }
+
 
     //Custom block
     public class CustomBlock : Block
