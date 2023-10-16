@@ -6,9 +6,9 @@ using Type = NodeBaseApi.Version2.Type;
 
 namespace NodeExacuteApi.Data.Blocks
 {
-    public class AddItemBlock : Block
+    public class AddItem : Block
     {
-        public AddItemBlock()
+        public AddItem()
         {
             Id = Guid.NewGuid();
             Name = "Add Item";
@@ -34,9 +34,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class RemoveItemBlock : Block
+    public class RemoveItem : Block
     {
-        public RemoveItemBlock()
+        public RemoveItem()
         {
             Id = Guid.NewGuid();
             Name = "Remove Item";
@@ -61,9 +61,9 @@ namespace NodeExacuteApi.Data.Blocks
             return new List<object> { list };
         }
     }
-    public class GetItemBlock : Block
+    public class GetItem : Block
     {
-        public GetItemBlock()
+        public GetItem()
         {
             Id = Guid.NewGuid();
             Name = "Get Item";
@@ -89,9 +89,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class SetItemBlock : Block
+    public class SetItem : Block
     {
-        public SetItemBlock()
+        public SetItem()
         {
             Id = Guid.NewGuid();
             Name = "Set Item";
@@ -119,9 +119,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class FindItemBlock : Block
+    public class FindItem : Block
     {
-        public FindItemBlock()
+        public FindItem()
         {
             Id = Guid.NewGuid();
             Name = "Find Item";

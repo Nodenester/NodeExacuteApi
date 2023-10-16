@@ -8,12 +8,12 @@ using Type = NodeBaseApi.Version2.Type;
 
 namespace NodeExacuteApi.Data.Blocks
 {
-    public class ImageResizeBlock : Block
+    public class ImageResize : Block
     {
-        public ImageResizeBlock()
+        public ImageResize()
         {
             Id = Guid.NewGuid();
-            Name = "ImageResizeBlock";
+            Name = "ImageResize";
             Description = "Resizes an image to the specified dimensions.";
             Inputs = new List<Input>
             {
@@ -49,12 +49,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class ImageRotateBlock : Block
+    public class ImageRotate : Block
     {
-        public ImageRotateBlock()
+        public ImageRotate()
         {
             Id = Guid.NewGuid();
-            Name = "ImageRotateBlock";
+            Name = "ImageRotate";
             Description = "Rotates an image by the specified angle.";
             Inputs = new List<Input>
         {
@@ -101,12 +101,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class ImageGrayscaleBlock : Block
+    public class ImageGrayscale : Block
     {
-        public ImageGrayscaleBlock()
+        public ImageGrayscale()
         {
             Id = Guid.NewGuid();
-            Name = "ImageGrayscaleBlock";
+            Name = "ImageGrayscale";
             Description = "Converts an image to grayscale.";
             Inputs = new List<Input>
         {
@@ -154,12 +154,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class DepthMapBlock : Block
+    public class DepthMap : Block
     {
-        public DepthMapBlock()
+        public DepthMap()
         {
             Id = Guid.NewGuid();
-            Name = "DepthMapBlock";
+            Name = "DepthMap";
             Description = "Generates a depth map from a stereo pair of images.";
             Inputs = new List<Input>
         {
@@ -191,12 +191,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class ThresholdBlock : Block
+    public class Threshold : Block
     {
-        public ThresholdBlock()
+        public Threshold()
         {
             Id = Guid.NewGuid();
-            Name = "ThresholdBlock";
+            Name = "Threshold";
             Description = "Applies a threshold to an image.";
             Inputs = new List<Input>
         {
@@ -226,12 +226,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class BlurBlock : Block
+    public class Blur : Block
     {
-        public BlurBlock()
+        public Blur()
         {
             Id = Guid.NewGuid();
-            Name = "BlurBlock";
+            Name = "Blur";
             Description = "Applies blurring to an image.";
             Inputs = new List<Input>
             {
@@ -261,12 +261,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class EdgeDetectionBlock : Block
+    public class EdgeDetection : Block
     {
-        public EdgeDetectionBlock()
+        public EdgeDetection()
         {
             Id = Guid.NewGuid();
-            Name = "EdgeDetectionBlock";
+            Name = "EdgeDetection";
             Description = "Detects edges in an image using the Canny edge detection algorithm.";
             Inputs = new List<Input>
             {
@@ -298,12 +298,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class ColorFilterBlock : Block
+    public class ColorFilter : Block
     {
-        public ColorFilterBlock()
+        public ColorFilter()
         {
             Id = Guid.NewGuid();
-            Name = "ColorFilterBlock";
+            Name = "ColorFilter";
             Description = "Filters an image based on color.";
             Inputs = new List<Input>
             {
@@ -341,12 +341,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class HistogramEqualizationBlock : Block
+    public class HistogramEqualization : Block
     {
-        public HistogramEqualizationBlock()
+        public HistogramEqualization()
         {
             Id = Guid.NewGuid();
-            Name = "HistogramEqualizationBlock";
+            Name = "HistogramEqualization";
             Description = "Improves the contrast in an image by stretching the range of intensity values.";
             Inputs = new List<Input>
             {
@@ -374,12 +374,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class ImageInversionBlock : Block
+    public class ImageInversion : Block
     {
-        public ImageInversionBlock()
+        public ImageInversion()
         {
             Id = Guid.NewGuid();
-            Name = "ImageInversionBlock";
+            Name = "ImageInversion";
             Description = "Inverts the colors of an image.";
             Inputs = new List<Input>
             {
@@ -407,12 +407,12 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class SimpleChromaKeyBlock : Block
+    public class SimpleChromaKey: Block
     {
-        public SimpleChromaKeyBlock()
+        public SimpleChromaKey()
         {
             Id = Guid.NewGuid();
-            Name = "SimpleChromaKeyBlock";
+            Name = "SimpleChromaKey";
             Description = "Replaces a specified color in the input image with a background image.";
             Inputs = new List<Input>
             {

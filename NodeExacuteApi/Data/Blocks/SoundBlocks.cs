@@ -8,9 +8,9 @@ using Type = NodeBaseApi.Version2.Type;
 
 namespace NodeExacuteApi.Data.Blocks
 {
-    public class AudioLengthBlock : Block
+    public class AudioLength : Block
     {
-        public AudioLengthBlock()
+        public AudioLength()
         {
             Id = Guid.NewGuid();
             Name = "AudioLength";
@@ -38,41 +38,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class AudioPlaybackBlock : Block
+    public class AudioVolumeChange : Block
     {
-        public AudioPlaybackBlock()
-        {
-            Id = Guid.NewGuid();
-            Name = "AudioPlayback";
-            Description = "Plays the audio.";
-            Inputs = new List<Input>
-        {
-            new Input { Id = Guid.NewGuid(), Name = "Audio", Description = "The audio file.", Type = Type.Audio, IsRequired = true }
-        };
-            Outputs = new List<Output> { };
-        }
-
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
-        {
-            byte[] audioData = (byte[])inputs[0];
-            using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            using (var waveOut = new NAudio.Wave.WaveOutEvent())
-            {
-                waveOut.Init(reader);
-                waveOut.Play();
-                while (waveOut.PlaybackState == NAudio.Wave.PlaybackState.Playing)
-                {
-                    Thread.Sleep(100);
-                }
-            }
-            return new List<object> { };
-        }
-    }
-
-    public class AudioVolumeChangeBlock : Block
-    {
-        public AudioVolumeChangeBlock()
+        public AudioVolumeChange()
         {
             Id = Guid.NewGuid();
             Name = "AudioVolumeChange";
@@ -111,9 +79,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class AudioConversionBlock : Block
+    public class AudioConversion : Block
     {
-        public AudioConversionBlock()
+        public AudioConversion()
         {
             Id = Guid.NewGuid();
             Name = "AudioConversion";
@@ -163,9 +131,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class AudioTrimmingBlock : Block
+    public class AudioTrimming : Block
     {
-        public AudioTrimmingBlock()
+        public AudioTrimming()
         {
             Id = Guid.NewGuid();
             Name = "AudioTrimming";
@@ -208,9 +176,9 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class AudioAmplificationBlock : Block
+    public class AudioAmplification : Block
     {
-        public AudioAmplificationBlock()
+        public AudioAmplification()
         {
             Id = Guid.NewGuid();
             Name = "AudioAmplification";

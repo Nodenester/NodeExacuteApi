@@ -8,15 +8,15 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public AndBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "AndBlock";
-            this.Description = "A block that performs a logical AND operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "AndBlock";
+            Description = "A block that performs a logical AND operation";
+            Inputs = new List<Input>
         {
             new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
             new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
         };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
         {
             new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the AND operation", Type = Type.Boolean }
         };
@@ -34,15 +34,15 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public OrBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "OrBlock";
-            this.Description = "A block that performs a logical OR operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Or Block";
+            Description = "A block that performs a logical OR operation";
+            Inputs = new List<Input>
         {
             new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
             new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
         };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
         {
             new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the OR operation", Type = Type.Boolean }
         };
@@ -60,14 +60,14 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public NotBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "NotBlock";
-            this.Description = "A block that performs a logical NOT operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Not Block";
+            Description = "A block that performs a logical NOT operation";
+            Inputs = new List<Input>
         {
             new Input { Id = Guid.NewGuid(), Name = "Input", Description = "Input", Type = Type.Boolean, IsRequired = true }
         };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
         {
             new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the NOT operation", Type = Type.Boolean }
         };
@@ -85,15 +85,15 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public XorBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "XorBlock";
-            this.Description = "A block that performs a logical XOR operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Xor Block";
+            Description = "A block that performs a logical XOR operation";
+            Inputs = new List<Input>
         {
             new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
             new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
         };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
         {
             new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the XOR operation", Type = Type.Boolean }
         };
@@ -112,15 +112,15 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public NandBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "NandBlock";
-            this.Description = "A block that performs a logical NAND operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Nand Block";
+            Description = "A block that performs a logical NAND operation";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
         new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the NAND operation", Type = Type.Boolean }
     };
@@ -138,15 +138,15 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public NorBlock()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "NorBlock";
-            this.Description = "A block that performs a logical NOR operation";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Nor Block";
+            Description = "A block that performs a logical NOR operation";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
         new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Output of the NOR operation", Type = Type.Boolean }
     };
@@ -160,19 +160,19 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class BooleanEqualityBlock : Block
+    public class BooleanEquality : Block
     {
-        public BooleanEqualityBlock()
+        public BooleanEquality()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "BooleanEqualityBlock";
-            this.Description = "A block that checks if two boolean values are equal";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Boolean Equality";
+            Description = "A block that checks if two boolean values are equal";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input", Type = Type.Boolean, IsRequired = true },
         new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Result of the equality check", Type = Type.Boolean }
     };
@@ -186,18 +186,18 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class BooleanToggleBlock : Block
+    public class BooleanToggle : Block
     {
-        public BooleanToggleBlock()
+        public BooleanToggle()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "BooleanToggleBlock";
-            this.Description = "A block that toggles a boolean value";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Boolean Toggle";
+            Description = "A block that toggles a boolean value";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input", Description = "Input value", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Toggled value", Type = Type.Boolean }
     };
@@ -211,18 +211,18 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class BooleanToStringBlock : Block
+    public class BooleanToString : Block
     {
-        public BooleanToStringBlock()
+        public BooleanToString()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "BooleanToStringBlock";
-            this.Description = "A block that converts a boolean value to a string";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Boolean ToString";
+            Description = "A block that converts a boolean value to a string";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input", Description = "Input value", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "String representation", Type = Type.String }
     };
@@ -236,18 +236,18 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class StringToBooleanBlock : Block
+    public class StringToBoolean : Block
     {
-        public StringToBooleanBlock()
+        public StringToBoolean()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "StringToBooleanBlock";
-            this.Description = "A block that converts a string to a boolean value";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "String ToBoolean";
+            Description = "A block that converts a string to a boolean value";
+            Inputs = new List<Input>
     {
         new Input { Id = Guid.NewGuid(), Name = "Input", Description = "Input string", Type = Type.String, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Boolean value", Type = Type.Boolean }
     };
@@ -262,18 +262,18 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    public class BooleanToIntegerBlock : Block
+    public class BooleanToInteger : Block
     {
-        public BooleanToIntegerBlock()
+        public BooleanToInteger()
         {
-            this.Id = Guid.NewGuid();
-            this.Name = "BooleanToIntegerBlock";
-            this.Description = "A block that converts a boolean value to an integer";
-            this.Inputs = new List<Input>
+            Id = Guid.NewGuid();
+            Name = "Boolean ToInteger";
+            Description = "A block that converts a boolean value to an integer";
+            Inputs = new List<Input>
             {
         new Input { Id = Guid.NewGuid(), Name = "Input", Description = "Input value", Type = Type.Boolean, IsRequired = true }
     };
-            this.Outputs = new List<Output>
+            Outputs = new List<Output>
             {
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Integer representation", Type = Type.Number }
     };
