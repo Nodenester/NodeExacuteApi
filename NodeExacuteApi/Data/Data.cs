@@ -297,7 +297,7 @@ namespace NodeBaseApi.Version2
                         ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
                     }
                 }
-                else if (blockToExecute.Block is SwitchBlock switchBlock)
+                else if (blockToExecute.Block is Switch switchBlock)
                 {
                     // Assuming the trigger input is at index 0 and the selector input is at index 1.
                     if (InputValues[switchBlock.Inputs.ToArray()[0].Id] != null) // Check if the trigger input is not null
@@ -400,9 +400,12 @@ namespace NodeBaseApi.Version2
     public class Session
     {
         public Guid SessionId { get; set; }
-        public Guid UserId { get; set; }
-        public Guid ProgramId { get; set; }
+        public string UserId { get; set; }
+        public string ProgramId { get; set; }
         public string Variables { get; set; }
+        public string SessionName { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime LastEditedTime { get; set; }
     }
     public class Input
     {

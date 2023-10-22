@@ -1,5 +1,4 @@
-﻿using MySqlX.XDevAPI.Common;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using NodeBaseApi.Version2;
 using Type = NodeBaseApi.Version2.Type;
 
@@ -178,12 +177,12 @@ namespace NodeExacuteApi.Data.Blocks
     }
 
     //Switch
-    public class SelectBlock : Block
+    public class Select : Block
     {
-        public SelectBlock()
+        public Select()
         {
             Id = Guid.NewGuid();
-            Name = "SelectBlock";
+            Name = "Select";
             Description = "Selects one of the inputs based on the selector value.";
             Inputs = new List<Input>
         {
@@ -212,12 +211,12 @@ namespace NodeExacuteApi.Data.Blocks
             return new List<object> { selectedInput };
         }
     }
-    public class SwitchBlock : Block
+    public class Switch : Block
     {
-        public SwitchBlock()
+        public Switch()
         {
             Id = Guid.NewGuid();
-            Name = "Switch Block";
+            Name = "Switch";
             Description = "Triggers different outputs based on a selector value.";
 
             Inputs = new List<Input>
@@ -229,8 +228,8 @@ namespace NodeExacuteApi.Data.Blocks
             Outputs = new List<Output>
     {
         new Output { Id = Guid.NewGuid(), Name = "DefaultOutput", Description = "The default output if no cases match.", Type = Type.Trigger },
-        new Output { Id = Guid.NewGuid(), Name = "OutputCase1", Description = "Triggered for case 1.", Type = Type.Trigger },
-        new Output { Id = Guid.NewGuid(), Name = "OutputCase2", Description = "Triggered for case 2.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "Case 1", Description = "Triggered for case 1.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "Case 2", Description = "Triggered for case 2.", Type = Type.Trigger },
     };
         }
 

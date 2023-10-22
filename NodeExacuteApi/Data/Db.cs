@@ -94,34 +94,37 @@ namespace NodeBaseApi.Version2
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    INSERT INTO sessions (SessionId, UserId, ProgramId, Variables)
-                    VALUES (@SessionId, @UserId, @ProgramId, @Variables);
-                ";
+            INSERT INTO Ludde.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
+            VALUES (@SessionId, @UserId, @ProgramId, @Variables, @SessionName, GETUTCDATE(), GETUTCDATE());
+        ";
 
                 await connection.ExecuteAsync(query, session);
             }
 
             return session.SessionId;
         }
+
         public async Task UpdateSessionAsync(Session session)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    UPDATE sessions
-                    SET Variables = @Variables
-                    WHERE SessionId = @SessionId;
-                ";
+            UPDATE Ludde.sessions
+            SET Variables = @Variables, LastEditedTime = GETUTCDATE()
+            WHERE SessionId = @SessionId;
+        ";
 
                 await connection.ExecuteAsync(query, session);
             }
+
         }
+
         public async Task<Session> GetSessionAsync(Guid sessionId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    SELECT SessionId, UserId, ProgramId, Variables
+                    SELECT SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime
                     FROM Ludde.sessions
                     WHERE SessionId = @SessionId;
                 ";
@@ -129,6 +132,7 @@ namespace NodeBaseApi.Version2
                 return await connection.QuerySingleOrDefaultAsync<Session>(query, new { SessionId = sessionId });
             }
         }
+
 
         //Token stuff
         public async Task<Guid> GetUserId(Guid ApiKey)

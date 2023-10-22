@@ -67,27 +67,20 @@ namespace NodeExacuteApi.Controllers
 
             Session session = null;
 
-            if (sessionId.HasValue)
+            if(program.SupportsSessions && sessionId.HasValue)
             {
                 session = await _dbConnection.GetSessionAsync(sessionId.Value);
 
                 if (session == null)
                 {
                     // Check if the program supports sessions
-                    if (program.SupportsSessions)
-                    {
-                        // Create a new session and store it in the database
-                        session = new Session { SessionId = Guid.NewGuid(), Variables = JsonConvert.SerializeObject(new Dictionary<Guid, object>()) };
-                        await _dbConnection.CreateSessionAsync(session);
+                    session = new Session { SessionId = sessionId.Value, Variables = JsonConvert.SerializeObject(new Dictionary<Guid, object>()) };
+                    await _dbConnection.CreateSessionAsync(session);
 
-                        // Set the session variables in the program structure
-                        var sessionVariables = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(session.Variables);
-                        program.ProgramStructure.SetSessionVariables(sessionVariables);
-                    }
-                    else
-                    {
-                        return BadRequest(new { error = "Session not found and the program does not support sessions." });
-                    }
+                    // Set the session variables in the program structure
+                    var sessionVariables = JsonConvert.DeserializeObject<Dictionary<Guid, object>>(session.Variables);
+                    program.ProgramStructure.SetSessionVariables(sessionVariables);
+                    return BadRequest(new { error = "Session not found and the program does not support sessions." });
                 }
                 else
                 {
@@ -95,6 +88,7 @@ namespace NodeExacuteApi.Controllers
                     program.ProgramStructure.SetSessionVariables(sessionVariables);
                 }
             }
+
 
             // Set the input values for the program
             foreach (var kvp in inputValues)
