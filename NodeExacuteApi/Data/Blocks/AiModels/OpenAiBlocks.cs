@@ -31,7 +31,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var apiKey = inputs[0].ToString();
             var prompt = inputs[1].ToString();
@@ -82,7 +82,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 model = Model.TextModerationLatest;
             }
 
-            var result = api.Chat.CreateChatCompletionAsync(new ChatRequest()
+            var result = await api.Chat.CreateChatCompletionAsync(new ChatRequest()
             {
                 Model = model,
                 MaxTokens = maxTokens,
@@ -91,8 +91,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
             });
 
-            programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
+            programStructure.InputValues[Outputs[0].Id] = result.Object;
         }
     }
 
@@ -116,14 +115,14 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var apiKey = inputs[0].ToString();
             var prompt = inputs[1].ToString();
 
             var api = new OpenAI_API.OpenAIAPI(apiKey);
-            var result = api.ImageGenerations.CreateImageAsync(prompt); 
-            var byteArray = Convert.FromBase64String(result.Result.Data.FirstOrDefault().Base64Data);  
+            var result = await api.ImageGenerations.CreateImageAsync(prompt); 
+            var byteArray = Convert.FromBase64String(result.Data.FirstOrDefault().Base64Data);  
 
             // Convert byte array to Image
             using (MemoryStream ms = new MemoryStream(byteArray))
@@ -131,10 +130,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 Image generatedImage = Image.FromStream(ms);
 
                 programStructure.InputValues[Outputs[0].Id] = generatedImage;
-                return new List<object> { generatedImage };
             }
         }
-
     }
 
     //public class WhisperASRBlock : Block

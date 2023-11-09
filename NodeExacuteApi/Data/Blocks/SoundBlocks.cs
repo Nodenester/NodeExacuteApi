@@ -25,7 +25,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] audioData = (byte[])inputs[0];
             using (var ms = new MemoryStream(audioData))
@@ -33,7 +33,6 @@ namespace NodeExacuteApi.Data.Blocks
             {
                 double lengthInSeconds = reader.TotalTime.TotalSeconds;
                 programStructure.InputValues[Outputs[0].Id] = lengthInSeconds;
-                return new List<object> { lengthInSeconds };
             }
         }
     }
@@ -56,7 +55,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] audioData = (byte[])inputs[0];
             float volume = (float)Convert.ToDouble(inputs[1]);
@@ -74,7 +73,6 @@ namespace NodeExacuteApi.Data.Blocks
                 }
                 byte[] outputAudioData = outputStream.ToArray();
                 programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-                return new List<object> { outputAudioData };
             }
         }
     }
@@ -97,7 +95,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] audioData = (byte[])inputs[0];
             string targetFormat = (string)inputs[1];
@@ -126,7 +124,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] outputAudioData = outputStream.ToArray();
                 programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-                return new List<object> { outputAudioData };
             }
         }
     }
@@ -150,7 +147,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] audioData = (byte[])inputs[0];
             double startTime = Convert.ToDouble(inputs[1]);
@@ -171,7 +168,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] outputAudioData = outputStream.ToArray();
                 programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-                return new List<object> { outputAudioData };
             }
         }
     }
@@ -194,7 +190,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] audioData = (byte[])inputs[0];
             float factor = (float)Convert.ToDouble(inputs[1]);
@@ -213,7 +209,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] outputAudioData = outputStream.ToArray();
                 programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-                return new List<object> { outputAudioData };
             }
         }
     }

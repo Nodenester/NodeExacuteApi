@@ -27,9 +27,8 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            return new List<object>();
         }
     }
     public class ForLoop : Block
@@ -54,9 +53,9 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            return new List<object>();
+
         }
     }
     public class WhileLoop : Block
@@ -80,9 +79,9 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            return new List<object>();
+
         }
     }
 
@@ -108,9 +107,9 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            return new List<object>();
+
         }
     }
 
@@ -136,12 +135,11 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             programStructure.Variables[variableid].Value = inputs[1];
 
             // Trigger output
-            return new List<object> { null };
         }
     }
     public class GetVariable : Block
@@ -167,12 +165,11 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             object value = programStructure.Variables[variableid].Value;
             // Return the value as output
             programStructure.InputValues[Outputs[0].Id] = value;
-            return new List<object> { value };
         }
     }
 
@@ -197,7 +194,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             int selector = Convert.ToInt32(inputs[0]);
 
@@ -208,7 +205,6 @@ namespace NodeExacuteApi.Data.Blocks
 
             object selectedInput = inputs[selector];
             programStructure.InputValues[Outputs[0].Id] = selectedInput;
-            return new List<object> { selectedInput };
         }
     }
     public class Switch : Block
@@ -233,9 +229,9 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            return new List<object>();
+
         }
     }
 
@@ -262,7 +258,7 @@ namespace NodeExacuteApi.Data.Blocks
         }
 
         //need to remake this because now they dont work  they need to get the right programstructure
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             Session session = null;
             Guid guidSessionId;
@@ -341,8 +337,6 @@ namespace NodeExacuteApi.Data.Blocks
             {
                 programStructure.InputValues[Outputs[ProgramOutput.IndexOf(output) + 1].Id] = output;
             }
-
-            return new List<object> { ProgramOutput };
         }
     }
 }

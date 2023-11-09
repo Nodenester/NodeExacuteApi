@@ -22,11 +22,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = (bool)inputs[0] && (bool)inputs[1];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -48,11 +47,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = (bool)inputs[0] || (bool)inputs[1];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -73,11 +71,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = !(bool)inputs[0];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -99,11 +96,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = (bool)inputs[0] ^ (bool)inputs[1];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -126,11 +122,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = !((bool)inputs[0] && (bool)inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -152,11 +147,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = !((bool)inputs[0] || (bool)inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -178,11 +172,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = (bool)inputs[0] == (bool)inputs[1];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -203,11 +196,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = !(bool)inputs[0];
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -228,11 +220,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             string result = ((bool)inputs[0]).ToString();
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -253,12 +244,11 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result;
             Boolean.TryParse(inputs[0].ToString(), out result);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -278,11 +268,10 @@ namespace NodeExacuteApi.Data.Blocks
         new Output { Id = Guid.NewGuid(), Name = "Output", Description = "Integer representation", Type = Type.Number }
     };
         }
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             int result = (bool)inputs[0] ? 1 : 0;
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 }

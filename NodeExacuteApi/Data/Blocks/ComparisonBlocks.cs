@@ -26,11 +26,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) > Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -54,11 +53,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) < Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -82,11 +80,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) == Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -110,11 +107,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) != Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -138,11 +134,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) >= Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -166,11 +161,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             bool result = Convert.ToDouble(inputs[0]) <= Convert.ToDouble(inputs[1]);
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 }

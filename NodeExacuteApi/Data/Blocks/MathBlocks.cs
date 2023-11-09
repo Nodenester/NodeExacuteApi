@@ -23,7 +23,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double firstNumber = Convert.ToDouble(inputs[0]);
             double secondNumber = Convert.ToDouble(inputs[1]);
@@ -31,7 +31,6 @@ namespace NodeExacuteApi.Data.Blocks
             double sum = firstNumber + secondNumber;
 
             programStructure.InputValues[Outputs[0].Id] = sum;
-            return new List<object> { sum };
         }
     }
 
@@ -53,7 +52,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double firstNumber = Convert.ToDouble(inputs[0]);
             double secondNumber = Convert.ToDouble(inputs[1]);
@@ -61,7 +60,6 @@ namespace NodeExacuteApi.Data.Blocks
             double difference = firstNumber - secondNumber;
 
             programStructure.InputValues[Outputs[0].Id] = difference;
-            return new List<object> { difference };
         }
     }
 
@@ -83,7 +81,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double firstNumber = Convert.ToDouble(inputs[0]);
             double secondNumber = Convert.ToDouble(inputs[1]);
@@ -91,7 +89,6 @@ namespace NodeExacuteApi.Data.Blocks
             double product = firstNumber * secondNumber;
 
             programStructure.InputValues[Outputs[0].Id] = product;
-            return new List<object> { product };
         }
     }
 
@@ -113,7 +110,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure , string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure , string sessionId, Guid variableid)
         {
             double firstNumber = Convert.ToDouble(inputs[0]);
             double secondNumber = Convert.ToDouble(inputs[1]);
@@ -126,7 +123,6 @@ namespace NodeExacuteApi.Data.Blocks
             double quotient = firstNumber / secondNumber;
 
             programStructure.InputValues[Outputs[0].Id] = quotient;
-            return new List<object> { quotient };
         }
     }
 
@@ -149,7 +145,7 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double firstNumber = Convert.ToDouble(inputs[0]);
             double secondNumber = Convert.ToDouble(inputs[1]);
@@ -162,7 +158,6 @@ namespace NodeExacuteApi.Data.Blocks
             double remainder = firstNumber % secondNumber;
 
             programStructure.InputValues[Outputs[0].Id] = remainder;
-            return new List<object> { remainder };
         }
     }
 
@@ -184,7 +179,7 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double baseNumber = Convert.ToDouble(inputs[0]);
             double exponent = Convert.ToDouble(inputs[1]);
@@ -192,7 +187,6 @@ namespace NodeExacuteApi.Data.Blocks
             double result = Math.Pow(baseNumber, exponent);
 
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -213,7 +207,7 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double number = Convert.ToDouble(inputs[0]);
 
@@ -225,7 +219,6 @@ namespace NodeExacuteApi.Data.Blocks
             double result = Math.Sqrt(number);
 
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -246,14 +239,13 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double number = Convert.ToDouble(inputs[0]);
 
             double result = Math.Abs(number);
 
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -279,7 +271,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             double min = Convert.ToDouble(inputs[0]);
             double max = Convert.ToDouble(inputs[1]);
@@ -293,7 +285,6 @@ namespace NodeExacuteApi.Data.Blocks
             double result = min + _random.NextDouble() * (max - min);
 
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 

@@ -24,13 +24,12 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
             var item = inputs[1];
             list.Add(item);
             programStructure.InputValues[Outputs[0].Id] = list;
-            return new List<object> { list };
         }
     }
 
@@ -52,13 +51,12 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
             var index = Convert.ToInt32(inputs[1]);
             list.RemoveAt(index);
             programStructure.InputValues[Outputs[0].Id] = list;
-            return new List<object> { list };
         }
     }
     public class GetItem : Block
@@ -79,13 +77,12 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
             var index = Convert.ToInt32(inputs[1]);
             var item = list[index];
             programStructure.InputValues[Outputs[0].Id] = item;
-            return new List<object> { item };
         }
     }
 
@@ -108,14 +105,13 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
             var index = Convert.ToInt32(inputs[1]);
             var item = inputs[2];
             list[index] = item;
             programStructure.InputValues[Outputs[0].Id] = list;
-            return new List<object> { list };
         }
     }
 
@@ -137,13 +133,12 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
             var item = inputs[1];
             var index = list.IndexOf(item);
             programStructure.InputValues[Outputs[0].Id] = index;
-            return new List<object> { index };
         }
     }
 }

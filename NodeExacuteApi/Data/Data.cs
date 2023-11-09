@@ -182,17 +182,17 @@ namespace NodeBaseApi.Version2
             CustomPrograms[customProgram.Id] = customProgram;
         }
 
-        public void ExecuteProgram(string sessionId)
+        public async void ExecuteProgram(string sessionId)
         {
             // Execute the program starting from the default start trigger and this list should only contain blocks with trigger inputs
             Output startTrigger = ProgramStart.FirstOrDefault(output => output.Type == Type.Trigger);
             if (startTrigger != null)
             {
-                ExecuteBlockAndConnected(startTrigger.Id, null, sessionId);
+                await ExecuteBlockAndConnectedAsync(startTrigger.Id, null, sessionId);
             }
         }
 
-        private void ExecuteBlockAndConnected(Guid outputId, ProgramBlock BlockToExecute, string sessionId)
+        private async Task ExecuteBlockAndConnectedAsync(Guid outputId, ProgramBlock BlockToExecute, string sessionId)
         {
             if (ProgramEndConnections.ContainsValue(outputId))
             {
@@ -205,7 +205,7 @@ namespace NodeBaseApi.Version2
                         // If this block has an output connected to the given input and doesn't have a trigger output
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId.Value) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
-                            ExecuteBlockAndConnected(Guid.Empty, pb, sessionId);
+                            await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
                         }
                     }
                 }
@@ -235,10 +235,9 @@ namespace NodeBaseApi.Version2
 
             if (blockToExecute != null)
             {
-
                 // Get the input values for the block and execute it
-                List<object> inputValues = GetInputValuesForBlock(blockToExecute, sessionId);
-                List<object> outputValues = blockToExecute.Block.ExecuteAsync(inputValues, this, sessionId, blockToExecute.VariableId);
+                List<object> inputValues = await GetInputValuesForBlock(blockToExecute, sessionId);
+                await blockToExecute.Block.ExecuteAsync(inputValues, this, sessionId, blockToExecute.VariableId);
 
                 // Check for loop and conditional blocks
                 if (blockToExecute.Block is IndexLoop indexLoop)
@@ -247,9 +246,9 @@ namespace NodeBaseApi.Version2
                     for (int i = 0; i < loopCount; i++)
                     {
                         InputValues[blockToExecute.Outputs[1]] = i;
-                        ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[0].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(indexLoop.Outputs.ToArray()[0].Id, null, sessionId);
                     }
-                    ExecuteBlockAndConnected(indexLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    await ExecuteBlockAndConnectedAsync(indexLoop.Outputs.ToArray()[2].Id, null, sessionId);
                 }
                 else if (blockToExecute.Block is ForLoop forLoop)
                 {
@@ -269,19 +268,19 @@ namespace NodeBaseApi.Version2
                     foreach (var item in list)
                     {
                         InputValues[forLoop.Outputs.ToArray()[1].Id] = item;
-                        ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
                     }
-                    ExecuteBlockAndConnected(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
                 }
                 else if (blockToExecute.Block is WhileLoop whileLoop)
                 {
                     bool condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
                     while (condition)
                     {
-                        ExecuteBlockAndConnected(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
                         condition = (bool)InputValues[whileLoop.Inputs.ToArray()[1].Id];
                     }
-                    ExecuteBlockAndConnected(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
                 }
                 else if (blockToExecute.Block is IfBlock ifBlock)
                 {
@@ -290,11 +289,11 @@ namespace NodeBaseApi.Version2
 
                     if (condition)
                     {
-                        ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[0].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(ifBlock.Outputs.ToArray()[0].Id, null, sessionId);
                     }
                     else
                     {
-                        ExecuteBlockAndConnected(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
                     }
                 }
                 else if (blockToExecute.Block is Switch switchBlock)
@@ -307,11 +306,11 @@ namespace NodeBaseApi.Version2
                         // The default output is at index 0. 
                         if (selector > 0 && selector < switchBlock.Outputs.Count())
                         {
-                            ExecuteBlockAndConnected(switchBlock.Outputs.ToArray()[selector].Id, null, sessionId);
+                            await ExecuteBlockAndConnectedAsync(switchBlock.Outputs.ToArray()[selector].Id, null, sessionId);
                         }
                         else
                         {
-                            ExecuteBlockAndConnected(switchBlock.Outputs.First().Id, null, sessionId); // Default case
+                            await ExecuteBlockAndConnectedAsync(switchBlock.Outputs.First().Id, null, sessionId); // Default case
                         }
                     }
                 }
@@ -319,7 +318,7 @@ namespace NodeBaseApi.Version2
                 //Get Next Block to exacute
                 if (blockToExecute.Block.Outputs[0].Type == Type.Trigger)
                 {
-                    ExecuteBlockAndConnected(blockToExecute.Block.Outputs[0].Id, null, sessionId);
+                    await ExecuteBlockAndConnectedAsync(blockToExecute.Block.Outputs[0].Id, null, sessionId);
                 }
                 else
                 {
@@ -329,7 +328,7 @@ namespace NodeBaseApi.Version2
         }
 
         // This function should collect input values for a block based on its connections
-        private List<object> GetInputValuesForBlock(ProgramBlock block, string sessionId)
+        private async Task<List<object>> GetInputValuesForBlock(ProgramBlock block, string sessionId)
         {
             List<object> inputValues = new List<object>();
 
@@ -342,7 +341,7 @@ namespace NodeBaseApi.Version2
                         // If this block has an output connected to the given input and doesn't have a trigger output
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
-                            ExecuteBlockAndConnected(Guid.Empty, pb, sessionId);
+                            await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
                         }
                     }
                     if (InputValues.ContainsKey(inputId))
@@ -373,7 +372,7 @@ namespace NodeBaseApi.Version2
         public List<Input> Inputs;
         public List<Output> Outputs;
 
-        public abstract List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid);
+        public abstract Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid);
     }
 
     public class ProgramBlock

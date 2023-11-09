@@ -27,7 +27,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             int width = Convert.ToInt32(inputs[1]);
@@ -43,7 +43,6 @@ namespace NodeExacuteApi.Data.Blocks
                     resizedImage.Save(resultStream, originalImage.RawFormat);
                     byte[] resultBytes = resultStream.ToArray();
                     programStructure.InputValues[Outputs[0].Id] = resultBytes;
-                    return new List<object> { resultBytes };
                 }
             }
         }
@@ -67,7 +66,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             float angle = Convert.ToSingle(inputs[1]);
@@ -82,7 +81,6 @@ namespace NodeExacuteApi.Data.Blocks
                     rotatedImage.Save(resultStream, originalImage.RawFormat);
                     byte[] resultBytes = resultStream.ToArray();
                     programStructure.InputValues[Outputs[0].Id] = resultBytes;
-                    return new List<object> { resultBytes };
                 }
             }
         }
@@ -118,7 +116,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
 
@@ -132,7 +130,6 @@ namespace NodeExacuteApi.Data.Blocks
                     grayscaleImage.Save(resultStream, originalImage.RawFormat);
                     byte[] resultBytes = resultStream.ToArray();
                     programStructure.InputValues[Outputs[0].Id] = resultBytes;
-                    return new List<object> { resultBytes };
                 }
             }
         }
@@ -172,7 +169,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] leftImageBytes = (byte[])inputs[0];
             byte[] rightImageBytes = (byte[])inputs[1];
@@ -186,7 +183,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] depthMapBytes = depthMap.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = depthMapBytes;
-                return new List<object> { depthMapBytes };
             }
         }
     }
@@ -209,7 +205,7 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             double thresholdValue = Convert.ToDouble(inputs[1]);
@@ -221,7 +217,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] thresholdedBytes = thresholded.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = thresholdedBytes;
-                return new List<object> { thresholdedBytes };
             }
         }
     }
@@ -244,7 +239,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             int kSize = Convert.ToInt32(inputs[1]);
@@ -256,7 +251,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] blurredBytes = blurred.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = blurredBytes;
-                return new List<object> { blurredBytes };
             }
         }
     }
@@ -280,7 +274,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             double lowerThreshold = Convert.ToDouble(inputs[1]);
@@ -293,7 +287,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] edgesBytes = edges.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = edgesBytes;
-                return new List<object> { edgesBytes };
             }
         }
     }
@@ -321,7 +314,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             Scalar lowerColor = new Scalar(Convert.ToDouble(inputs[1]), Convert.ToDouble(inputs[2]), Convert.ToDouble(inputs[3]));
@@ -336,7 +329,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] filteredBytes = filtered.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = filteredBytes;
-                return new List<object> { filteredBytes };
             }
         }
     }
@@ -358,7 +350,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
 
@@ -369,7 +361,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] equalizedBytes = equalized.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = equalizedBytes;
-                return new List<object> { equalizedBytes };
             }
         }
     }
@@ -391,7 +382,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
 
@@ -402,7 +393,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] invertedBytes = inverted.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = invertedBytes;
-                return new List<object> { invertedBytes };
             }
         }
     }
@@ -427,7 +417,7 @@ namespace NodeExacuteApi.Data.Blocks
             };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             byte[] imageBytes = (byte[])inputs[0];
             byte[] bgImageBytes = (byte[])inputs[1];
@@ -462,7 +452,6 @@ namespace NodeExacuteApi.Data.Blocks
 
                 byte[] outputBytes = outputImage.ToBytes(".png");
                 programStructure.InputValues[Outputs[0].Id] = outputBytes;
-                return new List<object> { outputBytes };
             }
         }
     }

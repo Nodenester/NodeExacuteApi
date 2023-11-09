@@ -23,12 +23,11 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             string result = (inputs[0]?.ToString() ?? string.Empty) + (inputs[1]?.ToString() ?? string.Empty);
 
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -49,14 +48,13 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             string inputString = inputs[0].ToString();
             if (inputString != null)
             {
                 var length = inputString.Length;
                 programStructure.InputValues[Outputs[0].Id] = length;
-                return new List<object> { length };
             }
             else
             {
@@ -85,11 +83,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var substring = ((string)inputs[0]).Substring((int)inputs[1], (int)inputs[2]);
             programStructure.InputValues[Outputs[0].Id] = substring;
-            return new List<object> { substring };
         }
     }
 
@@ -110,11 +107,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var result = ((string)inputs[0]).ToLower();
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -135,11 +131,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var result = ((string)inputs[0]).ToUpper();
             programStructure.InputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
         }
     }
 
@@ -161,11 +156,10 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var contains = inputs[0].ToString().Contains(inputs[1].ToString());
             programStructure.InputValues[Outputs[0].Id] = contains;
-            return new List<object> { contains };
         }
     }
 
@@ -188,11 +182,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var substrings = inputs[0].ToString().Split(new string[] { inputs[1].ToString() }, StringSplitOptions.None).ToList();
             programStructure.InputValues[Outputs[0].Id] = substrings;
-            return new List<object> { substrings };
         }
     }
 
@@ -214,12 +207,11 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var strings = ((List<object>)inputs[0]).ConvertAll(input => input.ToString());
             var resultantString = string.Join(inputs[1].ToString(), strings);
             programStructure.InputValues[Outputs[0].Id] = resultantString;
-            return new List<object> { resultantString };
         }
     }
 
@@ -242,11 +234,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var resultantString = inputs[0].ToString().Replace(inputs[1].ToString(), inputs[2].ToString());
             programStructure.InputValues[Outputs[0].Id] = resultantString;
-            return new List<object> { resultantString };
         }
     }
 
@@ -267,11 +258,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var trimmedString = inputs[0].ToString().Trim();
             programStructure.InputValues[Outputs[0].Id] = trimmedString;
-            return new List<object> { trimmedString };
         }
     }
 
@@ -293,11 +283,10 @@ namespace NodeExacuteApi.Data.Blocks
     };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var index = inputs[0].ToString().IndexOf(inputs[1].ToString());
             programStructure.InputValues[Outputs[0].Id] = index;
-            return new List<object> { index };
         }
     }
 
@@ -320,14 +309,13 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var match = Regex.Match(inputs[0].ToString(), inputs[1].ToString());
             var matchResult = match.Success;
             var matchedGroups = match.Groups.Cast<Group>().Select(g => g.Value).ToList();
             programStructure.InputValues[Outputs[0].Id] = matchResult;
             programStructure.InputValues[Outputs[1].Id] = matchedGroups;
-            return new List<object> { matchResult, matchedGroups };
         }
     }
 
@@ -349,13 +337,11 @@ namespace NodeExacuteApi.Data.Blocks
         };
         }
 
-        public override List<object> ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var args = ((List<object>)inputs[1]).ToArray();
             var formattedString = string.Format(inputs[0].ToString(), args);
             programStructure.InputValues[Outputs[0].Id] = formattedString;
-            return new List<object> { formattedString };
         }
     }
-
 }
