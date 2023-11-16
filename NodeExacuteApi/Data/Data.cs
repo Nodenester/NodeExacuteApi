@@ -182,7 +182,7 @@ namespace NodeBaseApi.Version2
             CustomPrograms[customProgram.Id] = customProgram;
         }
 
-        public async void ExecuteProgram(string sessionId)
+        public async Task ExecuteProgram(string sessionId)
         {
             // Execute the program starting from the default start trigger and this list should only contain blocks with trigger inputs
             Output startTrigger = ProgramStart.FirstOrDefault(output => output.Type == Type.Trigger);

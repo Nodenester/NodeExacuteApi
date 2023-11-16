@@ -99,7 +99,7 @@ namespace NodeExacuteApi.Controllers
             // Execute the program
             try
             {
-                program.ProgramStructure.ExecuteProgram(null);
+                await program.ProgramStructure.ExecuteProgram(null);
             }
             catch (Exception ex)
             {

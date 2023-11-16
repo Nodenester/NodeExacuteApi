@@ -12,8 +12,6 @@
 
   <ItemGroup>
     <PackageReference Include="Dapper" Version="2.1.15" />
-    <PackageReference Include="LLamaSharp" Version="0.7.0" />
-    <PackageReference Include="LLamaSharp.Backend.Cuda12" Version="0.7.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.13" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="5.1.2" />
     <PackageReference Include="MySql.Data" Version="8.2.0" />
