@@ -7,15 +7,17 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Type = NodeBaseApi.Version2.Type;
 using System.Net.Http.Headers;
+using System.Drawing.Imaging;
+using System.Drawing;
 
 namespace NodeExacuteApi.Data.Blocks.AiModels
 {
-    public class SegmentationBlock : Block
+    public class Segmentation : Block
     {
-        public SegmentationBlock()
+        public Segmentation()
         {
             Id = Guid.NewGuid();
-            Name = "Segmentation Block";
+            Name = "Segmentation";
             Description = "Processes an image using the NVIDIA SegFormer API and returns segmentation results.";
             Inputs = new List<Input>
         {
@@ -74,12 +76,12 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         }
     }
 
-    public class ViTBasePatch16Block : Block
+    public class ImageClassification : Block
     {
-        public ViTBasePatch16Block()
+        public ImageClassification()
         {
             Id = Guid.NewGuid();
-            Name = "ViT Base Patch16 API Block";
+            Name = "Image Classification";
             Description = "Processes an image using the ViT Base Patch16 API and returns a list of labels with scores.";
             Inputs = new List<Input>
         {
@@ -183,5 +185,153 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
         }
     }
+
+    public class ObjectCroping : Block
+    {
+        public ObjectCroping()
+        {
+            Id = Guid.NewGuid();
+            Name = "Object Croping";
+            Description = "Detects objects in an image using DETR-ResNet-50 and returns cropped images with labels.";
+            Inputs = new List<Input>
+        {
+            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for object detection" }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Name = "CroppedImagesWithLabels", Type = Type.Object, IsList = true, Description = "List of tuples containing cropped images and labels" }
+        };
+        }
+
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            if (inputs[0] is byte[] imageData)
+            {
+                var detectionResults = await CallObjectDetectionApiAsync(imageData);
+                var croppedImagesWithLabels = await CropImagesAsync(imageData, detectionResults);
+                programStructure.InputValues[Outputs[0].Id] = croppedImagesWithLabels;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid input type. Expected a byte array representing image data.");
+            }
+        }
+
+        private async Task<List<Dictionary<string, object>>> CallObjectDetectionApiAsync(byte[] imageData)
+        {
+            var apiUrl = "https://api-inference.huggingface.co/models/facebook/detr-resnet-50";
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+            using (var content = new ByteArrayContent(imageData))
+            {
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                var response = await client.PostAsync(apiUrl, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    return JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(responseString);
+                }
+                else
+                {
+                    throw new Exception($"API call failed: {response.StatusCode}");
+                }
+            }
+        }
+
+        private async Task<List<Tuple<string, byte[]>>> CropImagesAsync(byte[] originalImage, List<Dictionary<string, object>> detectionResults)
+        {
+            var croppedImagesWithLabels = new List<Tuple<string, byte[]>>();
+            foreach (var result in detectionResults)
+            {
+                var label = result["label"].ToString();
+                var box = (Dictionary<string, int>)result["box"];
+                var croppedImage = CropImage(originalImage, box);
+                croppedImagesWithLabels.Add(new Tuple<string, byte[]>(label, croppedImage));
+            }
+            return croppedImagesWithLabels;
+        }
+
+        private byte[] CropImage(byte[] originalImage, Dictionary<string, int> box)
+        {
+            using (var ms = new MemoryStream(originalImage))
+            {
+                using (var image = Image.FromStream(ms))
+                {
+                    var cropRect = new Rectangle(box["xmin"], box["ymin"], box["xmax"] - box["xmin"], box["ymax"] - box["ymin"]);
+                    var target = new Bitmap(cropRect.Width, cropRect.Height);
+
+                    using (var g = Graphics.FromImage(target))
+                    {
+                        g.DrawImage(image, new Rectangle(0, 0, target.Width, target.Height),
+                                         cropRect,
+                                         GraphicsUnit.Pixel);
+                    }
+
+                    var croppedImageStream = new MemoryStream();
+                    target.Save(croppedImageStream, ImageFormat.Jpeg);
+                    return croppedImageStream.ToArray();
+                }
+            }
+        }
+    }
+
+    public class TextToImage : Block
+    {
+        public TextToImage()
+        {
+            Id = Guid.NewGuid();
+            Name = "Text to image";
+            Description = "Generates an image from text using Stable Diffusion v1.5 model.";
+            Inputs = new List<Input>
+        {
+            new Input { Name = "TextPrompt", Type = Type.String, IsList = false, Description = "Text prompt for generating the image" }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Name = "GeneratedImage", Type = Type.Picture, IsList = false, Description = "Generated image data" }
+        };
+        }
+
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            if (inputs[0] is string textPrompt)
+            {
+                var imageData = await CallImageGenerationApiAsync(textPrompt);
+                programStructure.InputValues[Outputs[0].Id] = imageData;
+            }
+            else
+            {
+                throw new ArgumentException("Invalid input type. Expected a string for text prompt.");
+            }
+        }
+
+        private async Task<byte[]> CallImageGenerationApiAsync(string textPrompt)
+        {
+            var apiUrl = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+            var requestData = new { inputs = textPrompt };
+            var jsonRequest = JsonConvert.SerializeObject(requestData);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(apiUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStream = await response.Content.ReadAsStreamAsync();
+                var memoryStream = new MemoryStream();
+                await responseStream.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
+            else
+            {
+                throw new Exception($"API call failed: {response.StatusCode}");
+            }
+        }
+    }
+
 
 }
