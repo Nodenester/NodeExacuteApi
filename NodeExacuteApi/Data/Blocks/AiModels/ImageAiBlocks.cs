@@ -9,6 +9,7 @@ using Type = NodeBaseApi.Version2.Type;
 using System.Net.Http.Headers;
 using System.Drawing.Imaging;
 using System.Drawing;
+using System.Text.RegularExpressions;
 
 namespace NodeExacuteApi.Data.Blocks.AiModels
 {
@@ -333,5 +334,75 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         }
     }
 
+    public class TextReader : Block
+    {
+        public TextReader()
+        {
+            Id = Guid.NewGuid();
+            Name = "Text Reader";
+            Description = "This block reads text from images using the OCR-Donut-CORD model.";
+            Inputs = new List<Input>
+        {
+            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for text extraction" }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Name = "ExtractedText", Type = Type.String, IsList = false, Description = "Extracted text from the image" }
+        };
+        }
 
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            if (inputs[0] is byte[] imageData)
+            {
+                string extractedText = await CallOcrDonutApiAsync(imageData);
+                programStructure.InputValues[Outputs[0].Id] = ProcessExtractedText(extractedText);
+            }
+            else
+            {
+                throw new ArgumentException("Invalid input type. Expected a byte array representing image data.");
+            }
+        }
+
+        private async Task<string> CallOcrDonutApiAsync(byte[] imageData)
+        {
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+            using (var content = new ByteArrayContent(imageData))
+            {
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+                var response = await client.PostAsync("https://api-inference.huggingface.co/models/jinhybr/OCR-Donut-CORD", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    throw new Exception($"API call failed: {response.StatusCode}");
+                }
+            }
+        }
+
+        private string ProcessExtractedText(string rawText)
+        {
+            // Remove all tag-like elements
+            var cleanedText = Regex.Replace(rawText, "<[^>]*>", "");
+
+            // Further processing to filter out nonsensical text
+            // This is a basic example and might need refinement based on observed output patterns
+            var sensibleText = new StringBuilder();
+            var words = cleanedText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (var word in words)
+            {
+                if (!word.StartsWith("@") && word.Length > 1) // Basic check to filter out nonsensical parts
+                {
+                    sensibleText.Append(word + " ");
+                }
+            }
+
+            return sensibleText.ToString().Trim();
+        }
+    }
 }

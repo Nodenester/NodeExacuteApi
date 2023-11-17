@@ -9,12 +9,12 @@ using Type = NodeBaseApi.Version2.Type;
 
 namespace NodeExacuteApi.Data.Blocks.AiModels
 {
-    public class Llama27bBlock : Block
+    public class Llama27b : Block
     {
-        public Llama27bBlock()
+        public Llama27b()
         {
             Id = Guid.NewGuid();
-            Name = "Llama2 7b Block";
+            Name = "Llama2 7b";
             Description = "Llama 2-7b API";
             Inputs = new List<Input>
             {
@@ -53,12 +53,12 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         }
     }
 
-    public class Llama213bBlock : Block
+    public class Llama213b : Block
     {
-        public Llama213bBlock()
+        public Llama213b()
         {
             Id = Guid.NewGuid();
-            Name = "Llama2 13b Block";
+            Name = "Llama2 13b";
             Description = "Llama 2-13b API";
             Inputs = new List<Input>
         {
@@ -97,12 +97,12 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         }
     }
 
-    public class Llama270bBlock : Block
+    public class Llama270b : Block
     {
-        public Llama270bBlock()
+        public Llama270b()
         {
             Id = Guid.NewGuid();
-            Name = "Llama2 70b Block";
+            Name = "Llama2 70b";
             Description = "Llama 2-70b API";
             Inputs = new List<Input>
         {
