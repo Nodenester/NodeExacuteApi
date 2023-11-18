@@ -301,7 +301,7 @@ namespace NodeExacuteApi.Data.Blocks
             }
 
             // Execute the program
-            program.ProgramStructure.ExecuteProgram(sessionId);
+            await program.ProgramStructure.ExecuteProgram(sessionId);
 
             // Update the session variables if session is not null
             if (session != null)
