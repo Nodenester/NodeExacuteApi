@@ -48,6 +48,22 @@ namespace NodeBaseApi.Version2
                 string programDataJson = result.ProgramData;
 
                 var program = JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings);
+
+                foreach(var CustomBlock in program.ProgramStructure.CustomPrograms)
+                {
+                    var query2 = @"
+                    SELECT ProgramData
+                    FROM Ludde.programs
+                    WHERE Id = @Id ;
+                ";
+
+                    var result2 = await connection.QueryFirstOrDefaultAsync(query2, new { Id = CustomBlock.Value.Id });
+
+                    string programDataJson2 = result2.ProgramData;
+
+                    program.ProgramStructure.CustomPrograms[CustomBlock.Key] = JsonConvert.DeserializeObject<CustomBlockProgram>(programDataJson2, _jsonSerializerSettings);
+                }
+
                 return program;
             }
         }

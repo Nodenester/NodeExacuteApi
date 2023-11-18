@@ -334,6 +334,7 @@ namespace NodeBaseApi.Version2
 
             if(block.Block.Inputs.Count() > 0)
             {
+                var index = 0;
                 foreach (Guid inputId in block.Inputs)
                 {
                     foreach (ProgramBlock pb in ProgramBlocks)
@@ -350,13 +351,14 @@ namespace NodeBaseApi.Version2
                     }
                     else if (DirectInputValues.ContainsKey(block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id) && DirectInputValues[block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id].ToString() != "{}")
                     {
-                        var index = block.Inputs.IndexOf(inputId);
+                        //var index = block.Inputs.IndexOf(inputId);
                         inputValues.Add(DirectInputValues[block.Block.Inputs[index].Id]);
                     }
                     else
                     {
                         inputValues.Add(null);
                     }
+                    index++;
                 }
             }
             return inputValues;
