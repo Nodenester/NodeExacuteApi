@@ -180,7 +180,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
         private async Task<string> CallLlama270bApiAsync(string query, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
         {
-            var url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf";
+            var url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf";
             var parameters = new
             {
                 max_new_tokens = maxNewTokens,

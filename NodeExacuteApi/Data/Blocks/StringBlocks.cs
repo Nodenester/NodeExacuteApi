@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using NodeBaseApi.Version2;
+using System.Text;
 using System.Text.RegularExpressions;
 using Type = NodeBaseApi.Version2.Type;
 
@@ -25,8 +26,14 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            string result = (inputs[0]?.ToString() ?? string.Empty) + (inputs[1]?.ToString() ?? string.Empty);
+            StringBuilder resultBuilder = new StringBuilder();
 
+            foreach (var input in inputs)
+            {
+                resultBuilder.Append(input?.ToString() ?? string.Empty);
+            }
+
+            string result = resultBuilder.ToString();
             programStructure.InputValues[Outputs[0].Id] = result;
         }
     }

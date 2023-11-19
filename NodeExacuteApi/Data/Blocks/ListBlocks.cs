@@ -141,4 +141,42 @@ namespace NodeExacuteApi.Data.Blocks
             programStructure.InputValues[Outputs[0].Id] = index;
         }
     }
+    public class ObjectToList : Block
+    {
+        public ObjectToList()
+        {
+            Id = Guid.NewGuid();
+            Name = "Object To List";
+            Description = "Converts an object to a list of objects. If the object is already a list, it returns the list.";
+            Inputs = new List<Input>
+            {
+                new Input { Id = Guid.NewGuid(), Name = "Object", Description = "The object to convert to a list.", Type = Type.Object, IsRequired = true }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Id = Guid.NewGuid(), Name = "List", Description = "List of objects.", Type = Type.Object, IsList = true }
+            };
+        }
+
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            var inputObject = inputs[0];
+            List<object> resultList;
+
+            // Check if the input object is already a list
+            if (inputObject is List<object> inputList)
+            {
+                // If it's a list, use it directly
+                resultList = inputList;
+            }
+            else
+            {
+                // If it's not a list, create a new list and add the object to it
+                resultList = new List<object> { inputObject };
+            }
+
+            // Set the result list as the output
+            programStructure.InputValues[Outputs[0].Id] = resultList;
+        }
+    }
 }

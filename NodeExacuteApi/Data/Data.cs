@@ -196,8 +196,6 @@ namespace NodeBaseApi.Version2
         {
             if (ProgramEndConnections.ContainsValue(outputId))
             {
-                // Stop further execution
-                //And also get all empty inputs
                 foreach (var inputId in ProgramEndConnections)
                 {
                     foreach (ProgramBlock pb in ProgramBlocks)
@@ -206,6 +204,13 @@ namespace NodeBaseApi.Version2
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId.Value) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
                             await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
+                            if (pb.Outputs == null)
+                            {
+                                foreach (var output in pb.Block.Outputs)
+                                {
+                                    InputValues[outputId] = InputValues[output.Id];
+                                }
+                            }
                         }
                     }
                 }
