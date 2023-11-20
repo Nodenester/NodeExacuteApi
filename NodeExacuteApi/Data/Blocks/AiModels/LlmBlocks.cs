@@ -21,7 +21,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-7b API", IsRequired = true },
             new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
             new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+            new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
         };
             Outputs = new List<Output>
         {
@@ -36,11 +37,22 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             var topP = Convert.ToDouble(inputs[2]);
             var temperature = Convert.ToDouble(inputs[3]);
 
-            var responseString = await CallLlama27bApiAsync(query, maxNewTokens, topP, temperature);
+            // Safely handling the stopwords input
+            var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
+            var stopWords = new List<string>();
+            if (stopWordsInput != null)
+            {
+                if (stopWordsInput is List<object> stopWordsObjectList)
+                {
+                    stopWords = stopWordsObjectList.Select(obj => obj.ToString()).ToList();
+                }
+            }
+
+            var responseString = await CallLlama27bApiAsync(query, stopWords, maxNewTokens, topP, temperature);
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
-        private async Task<string> CallLlama27bApiAsync(string query, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
+        private async Task<string> CallLlama27bApiAsync(string query, List<string> stopWords, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
         {
             var url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-7b-chat-hf";
             var parameters = new
@@ -48,7 +60,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 max_new_tokens = maxNewTokens,
                 top_p = topP,
                 temperature = temperature,
-                return_full_text = false  // To prevent the response from including the input prompt
+                return_full_text = false,  // To prevent the response from including the input prompt
+                stop = stopWords
             };
             var payload = new
             {
@@ -90,7 +103,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
             new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
             new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+            new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
         };
             Outputs = new List<Output>
         {
@@ -105,11 +119,22 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             var topP = Convert.ToDouble(inputs[2]);
             var temperature = Convert.ToDouble(inputs[3]);
 
-            var responseString = await CallLlama213bApiAsync(query, maxNewTokens, topP, temperature);
+            // Safely handling the stopwords input
+            var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
+            var stopWords = new List<string>();
+            if (stopWordsInput != null)
+            {
+                if (stopWordsInput is List<object> stopWordsObjectList)
+                {
+                    stopWords = stopWordsObjectList.Select(obj => obj.ToString()).ToList();
+                }
+            }
+
+            var responseString = await CallLlama213bApiAsync(query, stopWords, maxNewTokens, topP, temperature);
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
-        private async Task<string> CallLlama213bApiAsync(string query, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
+        private async Task<string> CallLlama213bApiAsync(string query, List<string> stopWords, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6 )
         {
             var url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-13b-chat-hf";
             var parameters = new
@@ -117,7 +142,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 max_new_tokens = maxNewTokens,
                 top_p = topP,
                 temperature = temperature,
-                return_full_text = false  // To prevent the response from including the input prompt
+                return_full_text = false,  // To prevent the response from including the input prompt
+                stop = stopWords ?? new List<string>() // Adding stop words parameter
             };
             var payload = new
             {
@@ -159,7 +185,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-70b API", IsRequired = true },
             new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
             new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+            new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+            new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
         };
             Outputs = new List<Output>
         {
@@ -174,11 +201,23 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             var topP = Convert.ToDouble(inputs[2]);
             var temperature = Convert.ToDouble(inputs[3]);
 
-            var responseString = await CallLlama270bApiAsync(query, maxNewTokens, topP, temperature);
+            // Safely handling the stopwords input
+            var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
+            var stopWords = new List<string>();
+            if (stopWordsInput != null)
+            {
+                if (stopWordsInput is List<object> stopWordsObjectList)
+                {
+                    stopWords = stopWordsObjectList.Select(obj => obj.ToString()).ToList();
+                }
+            }
+
+            var responseString = await CallLlama270bApiAsync(query, stopWords, maxNewTokens, topP, temperature);
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
-        private async Task<string> CallLlama270bApiAsync(string query, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
+
+        private async Task<string> CallLlama270bApiAsync(string query, List<string> stopWords, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6)
         {
             var url = "https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf";
             var parameters = new
@@ -186,7 +225,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 max_new_tokens = maxNewTokens,
                 top_p = topP,
                 temperature = temperature,
-                return_full_text = false  // To prevent the response from including the input prompt
+                return_full_text = false,  // To prevent the response from including the input prompt
+                stop = stopWords
             };
             var payload = new
             {
