@@ -27,6 +27,11 @@ namespace NodeExacuteApi.Data.Blocks
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var list = inputs[0] as List<object>;
+            if(list == null)
+            {
+                list = new List<object>();
+            }
+
             var item = inputs[1];
             list.Add(item);
             programStructure.InputValues[Outputs[0].Id] = list;
@@ -79,7 +84,7 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            var list = inputs[0] as List<object>;
+            var list = inputs[0] as List<string>;
             var index = Convert.ToInt32(inputs[1]);
             var item = list[index];
             programStructure.InputValues[Outputs[0].Id] = item;

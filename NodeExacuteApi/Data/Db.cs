@@ -4,6 +4,7 @@ using System.Data;
 using Dapper;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
+using MySqlX.XDevAPI;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json.Serialization;
@@ -103,6 +104,28 @@ namespace NodeBaseApi.Version2
                 return count > 0;
             }
         }
+        public async Task<Guid?> GetUserIdByApiKeyAsync(string apiKey)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            SELECT UserId 
+            FROM Ludde.ApiKeys
+            WHERE ApiKey = @ApiKey;
+        ";
+
+                try
+                {
+                    var userId = await connection.QueryFirstOrDefaultAsync<Guid?>(query, new { ApiKey = apiKey });
+                    return userId;
+                }
+                catch (Exception ex)
+                {
+                    // Optionally log the exception
+                    return null;
+                }
+            }
+        }
 
         //Session stuff
         public async Task<Guid> CreateSessionAsync(Session session)
@@ -110,14 +133,20 @@ namespace NodeBaseApi.Version2
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-            INSERT INTO Ludde.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
-            VALUES (@SessionId, @UserId, @ProgramId, @Variables, @SessionName, GETUTCDATE(), GETUTCDATE());
-        ";
+                    INSERT INTO Ludde.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
+                    VALUES (@SessionId, @UserId, @ProgramId, @Variables, @SessionName, GETUTCDATE(), GETUTCDATE());
+                ";
 
-                await connection.ExecuteAsync(query, session);
+                try
+                {
+                    await connection.ExecuteAsync(query, session);
+                    return session.SessionId;
+                }
+                catch (Exception ex)
+                {
+                    return Guid.Empty;
+                }
             }
-
-            return session.SessionId;
         }
 
         public async Task UpdateSessionAsync(Session session)
@@ -125,30 +154,59 @@ namespace NodeBaseApi.Version2
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-            UPDATE Ludde.sessions
-            SET Variables = @Variables, LastEditedTime = GETUTCDATE()
-            WHERE SessionId = @SessionId;
-        ";
+                    UPDATE Ludde.sessions
+                    SET Variables = @Variables, LastEditedTime = GETUTCDATE()
+                    WHERE SessionId = @SessionId;
+                ";
 
-                await connection.ExecuteAsync(query, session);
+                try
+                { 
+                    await connection.ExecuteAsync(query, session);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
             }
 
         }
 
-        public async Task<Session> GetSessionAsync(Guid sessionId)
+        public async Task<Session> GetSessionAsync(string sessionId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    SELECT SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime
-                    FROM Ludde.sessions
-                    WHERE SessionId = @SessionId;
-                ";
+            SELECT SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime
+            FROM Ludde.sessions
+            WHERE SessionId = @SessionId;
+        ";
 
-                return await connection.QuerySingleOrDefaultAsync<Session>(query, new { SessionId = sessionId });
+                try
+                {
+                    var result = await connection.QueryFirstOrDefaultAsync<dynamic>(query, new { SessionId = sessionId });
+                    if (result != null)
+                    {
+                        var session = new Session
+                        {
+                            SessionId = Guid.Parse(result.SessionId),
+                            UserId = result.UserId,
+                            ProgramId = result.ProgramId,
+                            Variables = result.Variables,
+                            SessionName = result.SessionName,
+                            CreatedTime = result.CreatedTime,
+                            LastEditedTime = result.LastEditedTime
+                        };
+                        return session;
+                    }
+                    return null;
+                }
+                catch (Exception ex)
+                {
+                    // Log the exception here
+                    return null;
+                }
             }
         }
-
 
         //Token stuff
         public async Task<Guid> GetUserId(Guid ApiKey)

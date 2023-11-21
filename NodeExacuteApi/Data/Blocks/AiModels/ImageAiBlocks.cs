@@ -151,14 +151,15 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            if (inputs[0] is byte[] imageData)
+            try
             {
+                byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
                 var caption = await CallImageCaptioningApiAsync(imageData);
                 programStructure.InputValues[Outputs[0].Id] = caption;
             }
-            else
+            catch (FormatException ex)
             {
-                throw new ArgumentException("Invalid input type. Expected a byte array representing image data.");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -206,15 +207,17 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            if (inputs[0] is byte[] imageData)
+
+            try
             {
+                byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
                 var detectionResults = await CallObjectDetectionApiAsync(imageData);
                 var croppedImagesWithLabels = await CropImagesAsync(imageData, detectionResults);
                 programStructure.InputValues[Outputs[0].Id] = croppedImagesWithLabels;
             }
-            else
+            catch (FormatException ex)
             {
-                throw new ArgumentException("Invalid input type. Expected a byte array representing image data.");
+                Console.WriteLine(ex.Message);
             }
         }
 
@@ -283,7 +286,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public TextToImage()
         {
             Id = Guid.NewGuid();
-            Name = "Text to image";
+            Name = "Text To Image";
             Description = "Generates an image from text using Stable Diffusion v1.5 model.";
             Inputs = new List<Input>
         {
@@ -297,15 +300,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            if (inputs[0] is string textPrompt)
-            {
-                var imageData = await CallImageGenerationApiAsync(textPrompt);
-                programStructure.InputValues[Outputs[0].Id] = imageData;
-            }
-            else
-            {
-                throw new ArgumentException("Invalid input type. Expected a string for text prompt.");
-            }
+            var imageData = await CallImageGenerationApiAsync(inputs[0].ToString());
+            programStructure.InputValues[Outputs[0].Id] = imageData;
         }
 
         private async Task<byte[]> CallImageGenerationApiAsync(string textPrompt)

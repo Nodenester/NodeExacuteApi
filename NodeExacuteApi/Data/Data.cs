@@ -143,16 +143,19 @@ namespace NodeBaseApi.Version2
         public void SetSessionVariables(Dictionary<Guid, object> sessionVariables)
         {
             // Iterate through the session variables and update the Variables dictionary
-            foreach (var sessionVariable in sessionVariables)
+            if(sessionVariables != null)
             {
-                if (Variables.ContainsKey(sessionVariable.Key))
+                foreach (var sessionVariable in sessionVariables)
                 {
-                    Variables[sessionVariable.Key].Value = sessionVariable.Value;
-                }
-                else
-                {
-                    // If the session variable does not exist in the Variables dictionary, you can choose to create a new Variable object or throw an exception
-                    throw new InvalidOperationException($"Variable with ID '{sessionVariable.Key}' not found.");
+                    if (Variables.ContainsKey(sessionVariable.Key))
+                    {
+                        Variables[sessionVariable.Key].Value = sessionVariable.Value;
+                    }
+                    else
+                    {
+                        // If the session variable does not exist in the Variables dictionary, you can choose to create a new Variable object or throw an exception
+                        throw new InvalidOperationException($"Variable with ID '{sessionVariable.Key}' not found.");
+                    }
                 }
             }
         }
@@ -208,7 +211,14 @@ namespace NodeBaseApi.Version2
                             {
                                 foreach (var output in pb.Block.Outputs)
                                 {
-                                    InputValues[outputId] = InputValues[output.Id];
+                                    try
+                                    {
+                                        InputValues[outputId] = InputValues[output.Id];
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Console.WriteLine(ex);
+                                    }
                                 }
                             }
                         }
@@ -276,6 +286,7 @@ namespace NodeBaseApi.Version2
                         await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
                     }
                     await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    return;
                 }
                 else if (blockToExecute.Block is WhileLoop whileLoop)
                 {
@@ -364,6 +375,14 @@ namespace NodeBaseApi.Version2
                         inputValues.Add(null);
                     }
                     index++;
+                }
+                var difference = block.Block.Inputs.Count() - block.Inputs.Count();
+                if (difference > 0)
+                {
+                    for(int i = 1; i <= difference; i++)
+                    {
+                        inputValues.Add(DirectInputValues[block.Block.Inputs[(block.Inputs.Count() + i) - 1].Id]);
+                    }
                 }
             }
             return inputValues;

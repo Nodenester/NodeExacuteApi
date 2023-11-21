@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using NodeBaseApi.Version2;
+using Org.BouncyCastle.Bcpg;
 
 namespace NodeExacuteApi.Controllers
 {
@@ -43,6 +44,13 @@ namespace NodeExacuteApi.Controllers
                 return BadRequest(new { error = "Invalid API key." });
             }
 
+            var UserId = await _dbConnection.GetUserIdByApiKeyAsync(apiKey.ToString());
+            if (isTest && UserId == null)
+            {
+                UserId = apiKey;
+                //return NotFound();
+            }
+
             int maxPrice = await _dbConnection.GetUserTokensAsync(apiKey, !isTest);
             if(maxPrice < 50)
             {
@@ -69,12 +77,23 @@ namespace NodeExacuteApi.Controllers
 
             if(program.SupportsSessions && sessionId.HasValue)
             {
-                session = await _dbConnection.GetSessionAsync(sessionId.Value);
+                session = await _dbConnection.GetSessionAsync(sessionId.ToString());
 
                 if (session == null)
                 {
+                    var random = new Random();
+                    var randomString = new string(Enumerable.Repeat("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789", 6)
+                                                  .Select(s => s[random.Next(s.Length)]).ToArray());
+
                     // Check if the program supports sessions
-                    session = new Session { SessionId = sessionId.Value, Variables = JsonConvert.SerializeObject(new Dictionary<Guid, object>()) };
+                    session = new Session
+                    {
+                        SessionId = sessionId.Value,
+                        UserId = UserId.ToString(),
+                        ProgramId = program.Id.ToString(),
+                        Variables = JsonConvert.SerializeObject(new Dictionary<Guid, object>()),
+                        SessionName = $"Session-{randomString}"  // "Session-" followed by the random string
+                    };
                     await _dbConnection.CreateSessionAsync(session);
 
                     // Set the session variables in the program structure

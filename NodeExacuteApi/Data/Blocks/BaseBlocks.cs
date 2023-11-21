@@ -267,7 +267,7 @@ namespace NodeExacuteApi.Data.Blocks
 
             if (!string.IsNullOrEmpty(sessionId) && Guid.TryParse(sessionId, out guidSessionId))
             {
-                session = db.GetSessionAsync(guidSessionId).GetAwaiter().GetResult();
+                session = db.GetSessionAsync(guidSessionId.ToString()).GetAwaiter().GetResult();
 
                 if (session == null)
                 {
