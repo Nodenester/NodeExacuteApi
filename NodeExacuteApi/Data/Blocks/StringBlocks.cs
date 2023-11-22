@@ -165,6 +165,10 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
+            if (inputs[0] == null)
+            {
+                inputs[0] = "";
+            }
             var contains = inputs[0].ToString().Contains(inputs[1].ToString());
             programStructure.InputValues[Outputs[0].Id] = contains;
         }
@@ -243,6 +247,10 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
+            if (inputs[0] == null)
+            {
+                inputs[0] = "";
+            }
             var resultantString = inputs[0].ToString().Replace(inputs[1].ToString(), inputs[2].ToString());
             programStructure.InputValues[Outputs[0].Id] = resultantString;
         }

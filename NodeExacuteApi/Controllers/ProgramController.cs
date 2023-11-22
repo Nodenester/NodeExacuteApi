@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using NodeBaseApi.Version2;

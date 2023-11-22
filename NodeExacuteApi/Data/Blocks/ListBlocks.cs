@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using NodeBaseApi.Version2;
@@ -84,7 +85,7 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            var list = inputs[0] as List<string>;
+            var list = inputs[0] as List<object>;
             var index = Convert.ToInt32(inputs[1]);
             var item = list[index];
             programStructure.InputValues[Outputs[0].Id] = item;
@@ -182,6 +183,38 @@ namespace NodeExacuteApi.Data.Blocks
 
             // Set the result list as the output
             programStructure.InputValues[Outputs[0].Id] = resultList;
+        }
+    }
+
+    public class LastItem : Block
+    {
+        public LastItem()
+        {
+            Id = Guid.NewGuid();
+            Name = "Last Item";
+            Description = "Finds the index of an item in a list.";
+            Inputs = new List<Input>
+            {
+                new Input { Id = Guid.NewGuid(), Name = "List", Description = "The list to search in.", Type = Type.Object, IsRequired = true, IsList = true }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Id = Guid.NewGuid(), Name = "LastItem", Description = "The Last Item of that list.", Type = Type.Object }
+            };
+        }
+
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+            List<Object> list = new List<Object>((IEnumerable<Object>)inputs[0]);
+
+            if (list == null)
+            {
+                list = new List<object>();
+                return;
+            }
+            var LastItem = list.Last();
+
+            programStructure.InputValues[Outputs[0].Id] = LastItem;
         }
     }
 }

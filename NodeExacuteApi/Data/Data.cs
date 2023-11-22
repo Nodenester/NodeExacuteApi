@@ -290,13 +290,19 @@ namespace NodeBaseApi.Version2
                 }
                 else if (blockToExecute.Block is WhileLoop whileLoop)
                 {
-                    bool condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
+                    bool condition = false;
+                    try
+                    {
+                        condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
+                    }
+                    catch { }
+
                     while (condition)
                     {
-                        await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                        await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[0].Id, null, sessionId);
                         condition = (bool)InputValues[whileLoop.Inputs.ToArray()[1].Id];
                     }
-                    await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[1].Id, null, sessionId);
                 }
                 else if (blockToExecute.Block is IfBlock ifBlock)
                 {
