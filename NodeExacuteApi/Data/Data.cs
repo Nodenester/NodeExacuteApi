@@ -49,7 +49,7 @@ namespace NodeBaseApi.Version2
         public float zoom { get; set; } = 1;
 
         public int MaxPrice { get; set; } = 100;
-        public int CurrentPrizing { get; set; } = 50;
+        public int CurrentPrizing { get; set; } = 10;
 
         public Tuple<double, double> CameraPos { get; set; } = new Tuple<double, double>(0, 0);
         public Dictionary<Guid, object> InputValues { get; set; } = new Dictionary<Guid, object>();
@@ -57,6 +57,8 @@ namespace NodeBaseApi.Version2
         public Dictionary<Guid, CustomBlockProgram> CustomPrograms { get; set; } = new Dictionary<Guid, CustomBlockProgram>();
         public Dictionary<Guid, object> BlockOutputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> DirectInputValues { get; set; } = new Dictionary<Guid, object>();
+
+        public int CurrentTrigger { get; set; } = 1;
 
         //Pricing functions
         public void AddCost(int cost)
@@ -68,7 +70,6 @@ namespace NodeBaseApi.Version2
         {
             return MaxPrice >= cost;
         }
-
 
         public void AddProgramInput(Output output)
         {
@@ -197,6 +198,10 @@ namespace NodeBaseApi.Version2
 
         private async Task ExecuteBlockAndConnectedAsync(Guid outputId, ProgramBlock BlockToExecute, string sessionId)
         {
+            if(CurrentPrizing > MaxPrice)
+            {
+                return;
+            }
             if (ProgramEndConnections.ContainsValue(outputId))
             {
                 foreach (var inputId in ProgramEndConnections)
@@ -260,10 +265,13 @@ namespace NodeBaseApi.Version2
                     int loopCount = (int)InputValues[indexLoop.Inputs.ToArray()[1].Id];
                     for (int i = 0; i < loopCount; i++)
                     {
+                        CurrentTrigger++;
                         InputValues[blockToExecute.Outputs[1]] = i;
                         await ExecuteBlockAndConnectedAsync(indexLoop.Outputs.ToArray()[0].Id, null, sessionId);
                     }
+                    CurrentTrigger++;
                     await ExecuteBlockAndConnectedAsync(indexLoop.Outputs.ToArray()[2].Id, null, sessionId);
+                    return;
                 }
                 else if (blockToExecute.Block is ForLoop forLoop)
                 {
@@ -282,27 +290,34 @@ namespace NodeBaseApi.Version2
                     }
                     foreach (var item in list)
                     {
+                        CurrentTrigger++;
                         InputValues[forLoop.Outputs.ToArray()[1].Id] = item;
                         await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[0].Id, null, sessionId);
                     }
+                    CurrentTrigger++;
                     await ExecuteBlockAndConnectedAsync(forLoop.Outputs.ToArray()[2].Id, null, sessionId);
                     return;
                 }
                 else if (blockToExecute.Block is WhileLoop whileLoop)
                 {
+                    CurrentTrigger++;
                     bool condition = false;
                     try
                     {
-                        condition = (bool)InputValues[whileLoop.Outputs.ToArray()[0].Id];
+                        condition = (bool)InputValues[blockToExecute.Inputs.ToArray()[1]];
                     }
                     catch { }
 
                     while (condition)
                     {
+                        CurrentTrigger++;
                         await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[0].Id, null, sessionId);
-                        condition = (bool)InputValues[whileLoop.Inputs.ToArray()[1].Id];
+                        var result = await GetInputValuesForBlock(blockToExecute, sessionId);
+                        condition = (bool)result[1];
                     }
+                    CurrentTrigger++;
                     await ExecuteBlockAndConnectedAsync(whileLoop.Outputs.ToArray()[1].Id, null, sessionId);
+                    return;
                 }
                 else if (blockToExecute.Block is IfBlock ifBlock)
                 {
@@ -311,12 +326,15 @@ namespace NodeBaseApi.Version2
 
                     if (condition)
                     {
+                        CurrentTrigger++;
                         await ExecuteBlockAndConnectedAsync(ifBlock.Outputs.ToArray()[0].Id, null, sessionId);
                     }
                     else
                     {
+                        CurrentTrigger++;
                         await ExecuteBlockAndConnectedAsync(ifBlock.Outputs.ToArray()[1].Id, null, sessionId);
                     }
+                    return;
                 }
                 else if (blockToExecute.Block is Switch switchBlock)
                 {
@@ -328,10 +346,12 @@ namespace NodeBaseApi.Version2
                         // The default output is at index 0. 
                         if (selector > 0 && selector < switchBlock.Outputs.Count())
                         {
+                            CurrentTrigger++;
                             await ExecuteBlockAndConnectedAsync(switchBlock.Outputs.ToArray()[selector].Id, null, sessionId);
                         }
                         else
                         {
+                            CurrentTrigger++;
                             await ExecuteBlockAndConnectedAsync(switchBlock.Outputs.First().Id, null, sessionId); // Default case
                         }
                     }
@@ -340,6 +360,7 @@ namespace NodeBaseApi.Version2
                 //Get Next Block to exacute
                 if (blockToExecute.Block.Outputs[0].Type == Type.Trigger)
                 {
+                    CurrentTrigger++;
                     await ExecuteBlockAndConnectedAsync(blockToExecute.Block.Outputs[0].Id, null, sessionId);
                 }
                 else
@@ -349,7 +370,6 @@ namespace NodeBaseApi.Version2
             }
         }
 
-        // This function should collect input values for a block based on its connections
         private async Task<List<object>> GetInputValuesForBlock(ProgramBlock block, string sessionId)
         {
             List<object> inputValues = new List<object>();
@@ -361,10 +381,13 @@ namespace NodeBaseApi.Version2
                 {
                     foreach (ProgramBlock pb in ProgramBlocks)
                     {
-                        // If this block has an output connected to the given input and doesn't have a trigger output
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
-                            await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
+                            if(CurrentTrigger != pb.LastTrigger)
+                            {
+                                await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
+                                pb.LastTrigger = CurrentTrigger;
+                            }
                         }
                     }
                     if (InputValues.ContainsKey(inputId))
@@ -373,7 +396,6 @@ namespace NodeBaseApi.Version2
                     }
                     else if (DirectInputValues.ContainsKey(block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id) && DirectInputValues[block.Block.Inputs[block.Inputs.IndexOf(inputId)].Id].ToString() != "{}")
                     {
-                        //var index = block.Inputs.IndexOf(inputId);
                         inputValues.Add(DirectInputValues[block.Block.Inputs[index].Id]);
                     }
                     else
@@ -413,6 +435,8 @@ namespace NodeBaseApi.Version2
         public Block Block;
         public List<Guid> Inputs = new List<Guid>();
         public List<Guid> Outputs = new List<Guid>();
+
+        public int LastTrigger = 0;
         public Guid VariableId{ get; set; }
         public int X;
         public int Y;

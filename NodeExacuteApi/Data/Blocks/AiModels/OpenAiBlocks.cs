@@ -11,26 +11,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     //Gpt
     public class GPTBlock : Block
     {
-        public GPTBlock()
-        {
-            Id = Guid.NewGuid();
-            Name = "GPT Block";
-            Description = "Generates text using the GPT models";
-
-            Inputs = new List<Input>
-        {
-            new Input { Name = "API Key", Type = Type.String, IsRequired = true, Description = "Your OpenAI API key" },
-            new Input { Name = "Prompt", Type = Type.String, IsRequired = true, Description = "The text prompt to generate from" },
-            new Input { Name = "Max Tokens", Type = Type.Number, IsRequired = true, Description = "The text Max token amount" },
-            new Input { Name = "Temperature", Type = Type.Number, IsRequired = true, Description = "The text temperature" },
-        };
-
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Generated Text", Type = Type.String, Description = "The generated text" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var apiKey = inputs[0].ToString();
@@ -97,24 +77,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class DALLEBlock : Block
     {
-        public DALLEBlock()
-        {
-            Id = Guid.NewGuid();
-            Name = "DALL-E Block";
-            Description = "Generates images using the DALL-E model";
-
-            Inputs = new List<Input>
-        {
-            new Input { Name = "API Key", Type = Type.String, IsRequired = true, Description = "Your OpenAI API key" },
-            new Input { Name = "Prompt", Type = Type.String, IsRequired = true, Description = "The text prompt to generate an image from" }
-        };
-
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Generated Image", Type = Type.Picture, Description = "The generated image" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
             var apiKey = inputs[0].ToString();

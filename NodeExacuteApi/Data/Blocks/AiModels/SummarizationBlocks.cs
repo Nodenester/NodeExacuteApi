@@ -13,23 +13,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 {
     public class Summarize : Block
     {
-        public Summarize()
-        {
-            Id = Guid.NewGuid();
-            Name = "Summarize";
-            Description = "Summarize text using Bart Large CNN API";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "Text", Type = Type.String, Description = "The text input for the Bart Large CNN summarization API" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Summary", Type = Type.String, Description = "The summarized text from Bart Large CNN API" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             var textToSummarize = inputs[0].ToString();
             var summarizedText = await CallBartLargeCnnApiAsync(textToSummarize);
             programStructure.InputValues[Outputs[0].Id] = summarizedText;
@@ -57,23 +44,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class TextToText : Block
     {
-        public TextToText()
-        {
-            Id = Guid.NewGuid();
-            Name = "Text to Text";
-            Description = "This block processes text input and generates text output using the Google FLAN-T5-XXL API.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "Text", Type = Type.String, IsList = false, Description = "Text input for processing" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Text", Type = Type.String, IsList = false, Description = "Generated text output" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             string textInput = inputs[0].ToString();
             string textOutput = await CallFlanT5XxlApiAsync(textInput);
             programStructure.InputValues[Outputs[0].Id] = textOutput;
@@ -101,24 +75,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class FactualConsistency : Block
     {
-        public FactualConsistency()
-        {
-            Id = Guid.NewGuid();
-            Name = "Factual Consistency";
-            Description = "This block checks the factual consistency between two text inputs using the vectara/hallucination_evaluation_model.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "Text1", Type = Type.String, IsList = false, Description = "First text input" },
-            new Input { Name = "Text2", Type = Type.String, IsList = false, Description = "Second text input" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "ConsistencyScore", Type = Type.Number, IsList = false, Description = "Factual consistency score" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             string text1 = inputs[0].ToString();
             string text2 = inputs[1].ToString();
             string concatenatedText = $"{text1} [SEP] {text2}";

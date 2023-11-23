@@ -15,23 +15,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 {
     public class Segmentation : Block
     {
-        public Segmentation()
-        {
-            Id = Guid.NewGuid();
-            Name = "Segmentation";
-            Description = "Processes an image using the NVIDIA SegFormer API and returns segmentation results.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for segmentation" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "SegmentationResults", Type = Type.Object, IsList = true, Description = "Segmentation results with labels and masks" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             if (inputs[0] is byte[] imageData)
             {
                 var segmentationResults = await CallSegformerApiAsync(imageData);
@@ -79,23 +66,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class ImageClassification : Block
     {
-        public ImageClassification()
-        {
-            Id = Guid.NewGuid();
-            Name = "Image Classification";
-            Description = "Processes an image using the ViT Base Patch16 API and returns a list of labels with scores.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for analysis" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "AnalysisResults", Type = Type.Object, IsList = true, Description = "Labels and scores from image analysis" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             if (inputs[0] is byte[] imageData)
             {
                 var analysisResults = await CallViTBasePatch16ApiAsync(imageData);
@@ -134,23 +108,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class ImageCaptioning : Block
     {
-        public ImageCaptioning()
-        {
-            Id = Guid.NewGuid();
-            Name = "Image Captioning";
-            Description = "Generates a text description for a given image using the vit-gpt2-image-captioning model.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data to be captioned" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Caption", Type = Type.String, IsList = false, Description = "Generated image description" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             try
             {
                 byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
@@ -190,24 +151,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class ObjectCroping : Block
     {
-        public ObjectCroping()
-        {
-            Id = Guid.NewGuid();
-            Name = "Object Croping";
-            Description = "Detects objects in an image using DETR-ResNet-50 and returns cropped images with labels.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for object detection" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "CroppedImagesWithLabels", Type = Type.Object, IsList = true, Description = "List of tuples containing cropped images and labels" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             try
             {
                 byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
@@ -283,23 +230,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class TextToImage : Block
     {
-        public TextToImage()
-        {
-            Id = Guid.NewGuid();
-            Name = "Text To Image";
-            Description = "Generates an image from text using Stable Diffusion v1.5 model.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "TextPrompt", Type = Type.String, IsList = false, Description = "Text prompt for generating the image" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "GeneratedImage", Type = Type.Picture, IsList = false, Description = "Generated image data" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(20);
+            programStructure.CurrentPrizing += 20;
             var imageData = await CallImageGenerationApiAsync(inputs[0].ToString());
             programStructure.InputValues[Outputs[0].Id] = imageData;
         }
@@ -307,6 +241,46 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         private async Task<byte[]> CallImageGenerationApiAsync(string textPrompt)
         {
             var apiUrl = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
+            //var apiUrl = "https://api-inference.huggingface.co/models/openskyml/dalle-3-xl";
+
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+            var requestData = new { inputs = textPrompt };
+            var jsonRequest = JsonConvert.SerializeObject(requestData);
+            var content = new StringContent(jsonRequest, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync(apiUrl, content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var responseStream = await response.Content.ReadAsStreamAsync();
+                var memoryStream = new MemoryStream();
+                await responseStream.CopyToAsync(memoryStream);
+                return memoryStream.ToArray();
+            }
+            else
+            {
+                throw new Exception($"API call failed: {response.StatusCode}");
+            }
+        }
+    }
+
+    public class Dalle3 : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            programStructure.HasTokens(50);
+            programStructure.CurrentPrizing += 50;
+            var imageData = await CallImageGenerationApiAsync2(inputs[0].ToString());
+            programStructure.InputValues[Outputs[0].Id] = imageData;
+        }
+
+        private async Task<byte[]> CallImageGenerationApiAsync2(string textPrompt)
+        {
+            //var apiUrl = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
+            var apiUrl = "https://api-inference.huggingface.co/models/openskyml/dalle-3-xl";
+
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
 
@@ -332,23 +306,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
     public class TextReader : Block
     {
-        public TextReader()
-        {
-            Id = Guid.NewGuid();
-            Name = "Text Reader";
-            Description = "This block reads text from images using the OCR-Donut-CORD model.";
-            Inputs = new List<Input>
-        {
-            new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for text extraction" }
-        };
-            Outputs = new List<Output>
-        {
-            new Output { Name = "ExtractedText", Type = Type.String, IsList = false, Description = "Extracted text from the image" }
-        };
-        }
-
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             if (inputs[0] is byte[] imageData)
             {
                 string extractedText = await CallOcrDonutApiAsync(imageData);

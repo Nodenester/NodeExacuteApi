@@ -121,6 +121,8 @@ namespace NodeExacuteApi.Controllers
             }
             catch (Exception ex)
             {
+                int tokensLeft = program.ProgramStructure.MaxPrice - program.ProgramStructure.CurrentPrizing;
+                await _dbConnection.UpdateUserTokensAsync(apiKey, tokensLeft, !isTest);
                 return StatusCode(500, new { error = $"Error executing program: {ex.Message}" });
             }
 
@@ -165,8 +167,8 @@ namespace NodeExacuteApi.Controllers
                 IsTest = isTest,
                 StartTime = Stime,
                 EndTime = DateTime.UtcNow,
-                Input = inputValues.Select(kvp => (object)kvp).ToList(),
-                Output = ProgramOutput
+                //Input = inputValues.Select(kvp => (object)kvp).ToList(),
+                //Output = ProgramOutput
             };
 
             try
