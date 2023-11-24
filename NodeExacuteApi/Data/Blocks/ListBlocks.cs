@@ -11,10 +11,11 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            var list = inputs[0] as List<object>;
-            if(list == null)
+            var list = new List<object>();
+
+            if(inputs[0] != null)
             {
-                list = new List<object>();
+                list = ((IEnumerable)inputs[0]).Cast<object>().ToList();
             }
 
             var item = inputs[1];

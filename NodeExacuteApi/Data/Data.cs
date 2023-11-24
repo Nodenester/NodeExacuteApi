@@ -218,7 +218,7 @@ namespace NodeBaseApi.Version2
                                 {
                                     try
                                     {
-                                        InputValues[outputId] = InputValues[output.Id];
+                                        InputValues[inputId.Value] = InputValues[output.Id];
                                     }
                                     catch (Exception ex)
                                     {

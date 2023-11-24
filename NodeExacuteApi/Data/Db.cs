@@ -149,26 +149,43 @@ namespace NodeBaseApi.Version2
             }
         }
 
-        public async Task UpdateSessionAsync(Session session)
+        public async Task<bool> UpdateSessionAsync(Session session)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    UPDATE Ludde.sessions
-                    SET Variables = @Variables, LastEditedTime = GETUTCDATE()
-                    WHERE SessionId = @SessionId;
-                ";
+            UPDATE Ludde.sessions
+            SET Variables = @Variables, 
+                LastEditedTime = GETUTCDATE()
+            WHERE SessionId = @SessionId;
+        ";
 
                 try
-                { 
-                    await connection.ExecuteAsync(query, session);
+                {
+                    await connection.OpenAsync();
+                    var result = await connection.ExecuteAsync(query, new
+                    {
+                        SessionId = session.SessionId.ToString(),
+                        Variables = session.Variables.ToString()
+                    });
+                    if (result == 0)
+                    {
+                        Console.WriteLine("Update operation did not affect any rows.");
+                        return false;
+                    }
+                    return true;
+                }
+                catch (SqlException sqlEx)
+                {
+                    Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                    return false;
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Console.WriteLine($"General Error: {ex.ToString()}");
+                    return false;
                 }
             }
-
         }
 
         public async Task<Session> GetSessionAsync(string sessionId)

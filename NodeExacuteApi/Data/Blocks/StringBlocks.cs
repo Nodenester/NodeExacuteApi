@@ -152,4 +152,56 @@ namespace NodeExacuteApi.Data.Blocks
             programStructure.InputValues[Outputs[0].Id] = formattedString;
         }
     }
+
+    public class StringCleaner : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            var mainString = inputs[0].ToString();
+            var startDelimiter = inputs[1].ToString();
+            var endDelimiter = inputs[2].ToString();
+
+            var cleanedString = RemoveSubstringsBetweenDelimiters(mainString, startDelimiter, endDelimiter);
+
+            programStructure.InputValues[Outputs[0].Id] = cleanedString;
+        }
+
+        private string RemoveSubstringsBetweenDelimiters(string input, string start, string end)
+        {
+            var regexPattern = Regex.Escape(start) + "(.*?)" + Regex.Escape(end);
+            return Regex.Replace(input, regexPattern, string.Empty);
+        }
+    }
+
+    public class IntParser : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            var inputString = inputs[0].ToString();
+            if (int.TryParse(inputString, out int parsedInt))
+            {
+                programStructure.InputValues[Outputs[0].Id] = parsedInt;
+            }
+            else
+            {
+                // Handle the case where parsing fails, e.g., return a default value or log an error
+            }
+        }
+    }
+
+    public class BoolParser : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            var inputString = inputs[0].ToString();
+            if (bool.TryParse(inputString, out bool parsedBool))
+            {
+                programStructure.InputValues[Outputs[0].Id] = parsedBool;
+            }
+            else
+            {
+                // Handle the case where parsing fails, e.g., return a default value or log an error
+            }
+        }
+    }
 }

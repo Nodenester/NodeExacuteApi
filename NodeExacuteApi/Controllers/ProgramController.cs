@@ -1,8 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NodeBaseApi.Version2;
 using Org.BouncyCastle.Bcpg;
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace NodeExacuteApi.Controllers
 {
@@ -139,22 +142,19 @@ namespace NodeExacuteApi.Controllers
             //Create The output
             List<object> ProgramOutput = new List<object>();
 
-            bool isFirstIteration = true;
             foreach (var inputId in program.ProgramStructure.ProgramEndConnections)
             {
-                if (isFirstIteration)
+                if (program.ProgramStructure.InputValues.ContainsKey(inputId.Value) &&
+                    program.ProgramStructure.ProgramEnd.Any(input => input.Id == inputId.Key && input.Type != NodeBaseApi.Version2.Type.Trigger))
                 {
-                    isFirstIteration = false;
-                    continue;
-                }
-
-                if (program.ProgramStructure.InputValues.ContainsKey(inputId.Value))
-                {
-                    ProgramOutput.Add(program.ProgramStructure.InputValues[inputId.Value]);
-                }
-                else if (program.ProgramStructure.DirectInputValues.ContainsKey(inputId.Value))
-                {
-                    ProgramOutput.Add(program.ProgramStructure.DirectInputValues[inputId.Value]);
+                    if (program.ProgramStructure.InputValues.ContainsKey(inputId.Value))
+                    {
+                        ProgramOutput.Add(program.ProgramStructure.InputValues[inputId.Value]);
+                    }
+                    else if (program.ProgramStructure.DirectInputValues.ContainsKey(inputId.Value))
+                    {
+                        ProgramOutput.Add(program.ProgramStructure.DirectInputValues[inputId.Value]);
+                    }
                 }
             }
 
@@ -183,7 +183,60 @@ namespace NodeExacuteApi.Controllers
             }
 
             // Get the output values from the program and return them as JSON;
+
+            var convertedOutput = new List<object>();
+            foreach (var output in ProgramOutput)
+            {
+                convertedOutput.Add(ByteSwitch(output));
+            }
+            ProgramOutput = convertedOutput;
+
             return Ok(ProgramOutput);
+        }
+
+        private object ByteSwitch(object output)
+        {
+            switch (output)
+            {
+                case List<object> list:
+                    var convertedArray = new List<object>();
+                    foreach (var obj in list)
+                    {
+                        convertedArray.Add(ByteSwitch(obj));
+                    }
+                    return convertedArray;
+
+                case string text when IsBase64String(text) && IsImage(text):
+                    return Convert.FromBase64String(text); // Convert image base64 string to byte array and return
+
+                case string text when IsBase64String(text) && IsAudio(text):
+                    return Convert.FromBase64String(text); // Convert audio base64 string to byte array and return
+
+                default:
+                    return output; // Return the output as is for any other type
+            }
+        }
+
+        private bool IsBase64String(string s)
+        {
+            // Check if the string is likely a base64 string
+            return s.Length % 4 == 0 && Regex.IsMatch(s, @"^[a-zA-Z0-9\+/]*={0,3}$");
+        }
+
+        private bool IsImage(string base64)
+        {
+            if (base64.StartsWith("iVBOR")) return true; // PNG
+            if (base64.StartsWith("/9j/")) return true;  // JPEG
+            if (base64.StartsWith("R0lGOD") || base64.StartsWith("Qk02U")) return true;
+            return false;
+        }
+
+        private bool IsAudio(string base64)
+        {
+            // Implement based on known patterns for your audio format
+            // Example pattern check (this is just an example and might not be accurate for your case)
+            if (base64.StartsWith("UklGR")) return true;
+            return false;
         }
     }
 }
