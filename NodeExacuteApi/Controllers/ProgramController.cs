@@ -4,6 +4,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NodeBaseApi.Version2;
 using Org.BouncyCastle.Bcpg;
+using OtpNet;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 
@@ -23,7 +24,7 @@ namespace NodeExacuteApi.Controllers
         }
 
         [HttpPost("execute")]
-        public async Task<ActionResult> ExecuteProgramAsync([FromQuery] Guid programKey, [FromBody] Dictionary<Guid, object> inputValues, [FromQuery] Guid apiKey, [FromQuery] Guid? sessionId = null, bool isTest = false)
+        public async Task<ActionResult> ExecuteProgramAsync([FromQuery] Guid programKey, [FromBody] Dictionary<Guid, object> inputValues, [FromQuery] Guid apiKey, [FromQuery] Guid? sessionId = null, [FromQuery] bool isTest = false, [FromQuery] bool isCustomBlock = false, [FromQuery] string testToken = "")
         {
             if (programKey == Guid.Empty)
             {
@@ -38,6 +39,16 @@ namespace NodeExacuteApi.Controllers
             if (inputValues == null || inputValues.Count == 0)
             {
                 return BadRequest(new { error = "No input values provided." });
+            }
+
+            if(!isTest && isCustomBlock)
+            {
+                return BadRequest(new { error = "You can only trigger customblocks from the webapp." });
+            }
+
+            if(isTest && !ValidateTOTP(testToken))
+            {
+                return BadRequest(new { error = "Api calls cant be tests" });
             }
 
             //check if the api key exists
@@ -62,7 +73,7 @@ namespace NodeExacuteApi.Controllers
             CustomProgram program = new CustomProgram();
             try
             {
-                program = await _dbConnection.LoadProgramAsyncApi(programKey.ToString());
+                program = await _dbConnection.LoadProgramAsyncApi(programKey.ToString(), isCustomBlock);
             }
             catch (Exception ex)
             {
@@ -237,6 +248,14 @@ namespace NodeExacuteApi.Controllers
             // Example pattern check (this is just an example and might not be accurate for your case)
             if (base64.StartsWith("UklGR")) return true;
             return false;
+        }
+
+        public bool ValidateTOTP(string totpToken)
+        {
+            string secretKeyBase64 = "YOUR_TOTP_SECRET_HERE";
+            byte[] secretKey = Convert.FromBase64String(secretKeyBase64);
+            var totp = new Totp(secretKey);
+            return totp.VerifyTotp(totpToken, out long timeStepMatched, window: null);
         }
     }
 }

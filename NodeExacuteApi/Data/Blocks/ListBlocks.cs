@@ -141,4 +141,18 @@ namespace NodeExacuteApi.Data.Blocks
             programStructure.InputValues[Outputs[0].Id] = LastItem;
         }
     }
+
+    public class CombineObjects : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            var combinedList = new List<object>();
+            foreach (var input in inputs)
+            {
+                combinedList.Add(input);
+            }
+
+            programStructure.InputValues[Outputs[0].Id] = combinedList;
+        }
+    }
 }

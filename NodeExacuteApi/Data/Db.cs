@@ -34,17 +34,31 @@ namespace NodeBaseApi.Version2
             };
         }
         //Exacute stuff
-        public async Task<CustomProgram> LoadProgramAsyncApi(string ApiKey)
+        public async Task<CustomProgram> LoadProgramAsyncApi(string ApiKey, bool isCustomBlock)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                var query = @"
+                dynamic result;
+                var query = "";
+                if(!isCustomBlock)
+                {
+                    query = @"
                     SELECT ProgramData, IsCustomBlock
                     FROM Ludde.programs
                     WHERE ApiKey = @ApiKey ;
-                ";
+                    ";
+                }
+                else
+                {
+                    query = @"
+                    SELECT ProgramData, IsCustomBlock
+                    FROM Ludde.programs
+                    WHERE Id = @ApiKey ;
+                    ";
+                }
 
-                var result = await connection.QueryFirstOrDefaultAsync(query, new { ApiKey = ApiKey });
+
+                result = await connection.QueryFirstOrDefaultAsync(query, new { ApiKey = ApiKey });
 
                 string programDataJson = result.ProgramData;
 
