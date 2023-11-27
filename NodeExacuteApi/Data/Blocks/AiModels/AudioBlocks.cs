@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Type = NodeBaseApi.Version2.Type;
 using System.Net.Http.Headers;
+using System.Collections;
 
 namespace NodeExacuteApi.Data.Blocks.AiModels
 {
@@ -14,11 +15,14 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(20);
-            programStructure.CurrentPrizing += 20;
             if (inputs[0] is byte[] audioData)
             {
                 var transcription = await CallWhisperLargeV3ApiAsync(audioData);
+
+                var tokens = programStructure.CountTokens(transcription);
+                programStructure.HasTokens(tokens * 0.01);
+                programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
                 programStructure.InputValues[Outputs[0].Id] = transcription;
             }
             else
@@ -60,6 +64,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             string voicePreset = inputs.Count > 1 ? inputs[1].ToString() : null;
 
             byte[] audioData = await CallBarkApiAsync(textInput, voicePreset);
+
+            var tokens = programStructure.CountTokens(textInput);
+            programStructure.HasTokens(tokens * 0.01);
+            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
             programStructure.InputValues[Outputs[0].Id] = audioData;
         }
 
@@ -92,8 +101,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(20);
-            programStructure.CurrentPrizing += 20;
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             string prompt = inputs[0].ToString();
             byte[] musicData = await CallMusicGenApiAsync(prompt);
             programStructure.InputValues[Outputs[0].Id] = musicData;
@@ -124,8 +133,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(20);
-            programStructure.CurrentPrizing += 20;
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             if (inputs[0] is byte[] audioData)
             {
                 byte[] enhancedAudio = await CallSpeechEnhancementApiAsync(audioData);
@@ -160,5 +169,4 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
         }
     }
-
 }

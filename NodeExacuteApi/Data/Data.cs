@@ -66,9 +66,15 @@ namespace NodeBaseApi.Version2
             CurrentPrizing = CurrentPrizing + cost;
         }
 
-        public bool HasTokens(int cost)
+        public bool HasTokens(double cost)
         {
-            return MaxPrice >= cost;
+            return MaxPrice >= CurrentPrizing + cost;
+        }
+
+        public double CountTokens(string text)
+        {
+            int characterCount = text.Length;
+            return (characterCount / 4.5) / 10;
         }
 
         public void AddProgramInput(Output output)

@@ -280,6 +280,28 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
+    //public class WordCountBlock : Block
+    //{
+    //    public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+    //    {
+    //        var inputText = inputs[0].ToString();
+    //        var wordCount = inputText.Split(new char[] { ' ', '\n', '\t' }, StringSplitOptions.RemoveEmptyEntries).Length;
+
+    //        programStructure.InputValues[Outputs[0].Id] = wordCount;
+    //    }
+    //}
+
+    //public class CharacterCountBlock : Block
+    //{
+    //    public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+    //    {
+    //        var inputText = inputs[0].ToString();
+    //        var characterCount = inputText.Length;
+
+    //        programStructure.InputValues[Outputs[0].Id] = characterCount;
+    //    }
+    //}
+
     public class IntParser : Block
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)

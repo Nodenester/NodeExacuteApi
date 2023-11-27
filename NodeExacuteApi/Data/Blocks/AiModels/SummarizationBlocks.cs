@@ -15,10 +15,13 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
             var textToSummarize = inputs[0].ToString();
             var summarizedText = await CallBartLargeCnnApiAsync(textToSummarize);
+
+            var tokens = programStructure.CountTokens(summarizedText + textToSummarize);
+            programStructure.HasTokens(tokens * 0.01);
+            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
             programStructure.InputValues[Outputs[0].Id] = summarizedText;
         }
 
@@ -46,10 +49,13 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
             string textInput = inputs[0].ToString();
             string textOutput = await CallFlanT5XxlApiAsync(textInput);
+
+            var tokens = programStructure.CountTokens(textOutput + textInput);
+            programStructure.HasTokens(tokens * 0.01);
+            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
             programStructure.InputValues[Outputs[0].Id] = textOutput;
         }
 
@@ -77,13 +83,16 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
             string text1 = inputs[0].ToString();
             string text2 = inputs[1].ToString();
             string concatenatedText = $"{text1} [SEP] {text2}";
 
             double consistencyScore = await CallFactualConsistencyApiAsync(concatenatedText);
+
+            var tokens = programStructure.CountTokens(text1 + text2);
+            programStructure.HasTokens(tokens * 0.01);
+            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
             programStructure.InputValues[Outputs[0].Id] = consistencyScore;
         }
 

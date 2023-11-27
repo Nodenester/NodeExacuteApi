@@ -17,8 +17,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             if (inputs[0] is byte[] imageData)
             {
                 var segmentationResults = await CallSegformerApiAsync(imageData);
@@ -68,8 +68,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             if (inputs[0] is byte[] imageData)
             {
                 var analysisResults = await CallViTBasePatch16ApiAsync(imageData);
@@ -110,8 +110,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             try
             {
                 byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
@@ -153,8 +153,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             try
             {
                 byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
@@ -232,8 +232,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(20);
-            programStructure.CurrentPrizing += 20;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             var imageData = await CallImageGenerationApiAsync(inputs[0].ToString());
             programStructure.InputValues[Outputs[0].Id] = imageData;
         }
@@ -270,8 +270,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(50);
-            programStructure.CurrentPrizing += 50;
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             var imageData = await CallImageGenerationApiAsync2(inputs[0].ToString());
             programStructure.InputValues[Outputs[0].Id] = imageData;
         }
@@ -308,8 +308,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(5);
+            programStructure.CurrentPrizing += 5;
             if (inputs[0] is byte[] imageData)
             {
                 string extractedText = await CallOcrDonutApiAsync(imageData);

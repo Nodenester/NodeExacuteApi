@@ -13,8 +13,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(7);
-            programStructure.CurrentPrizing += 7;
             var query = inputs[0]?.ToString() ?? string.Empty;
             var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
             var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
@@ -33,6 +31,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
 
             var responseString = await CallLlama27bApiAsync(query, stopWords, maxNewTokens, topP, temperature, returnFullText);
+
+            var tokens = programStructure.CountTokens(responseString + query);
+            programStructure.HasTokens(tokens * 0.01);
+            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
@@ -93,8 +96,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
             var query = inputs[0]?.ToString() ?? string.Empty;
             var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
             var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
@@ -113,6 +114,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
 
             var responseString = await CallZephyr7bApiAsync(query, stopWords, maxNewTokens, topP, temperature, returnFullText);
+
+            var tokens = programStructure.CountTokens(responseString + query);
+            programStructure.HasTokens(tokens * 0.015);
+            programStructure.CurrentPrizing += (int)(tokens * 0.015);
+
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
@@ -173,8 +179,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(15);
-            programStructure.CurrentPrizing += 15;
             var query = inputs[0]?.ToString() ?? string.Empty;
             var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
             var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
@@ -193,6 +197,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
 
             var responseString = await CallLlama213bApiAsync(query, stopWords, maxNewTokens, topP, temperature, returnFullText);
+
+            var tokens = programStructure.CountTokens(responseString + query);
+            programStructure.HasTokens(tokens * 0.02);
+            programStructure.CurrentPrizing += (int)(tokens * 0.02);
+
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
@@ -253,8 +262,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(25);
-            programStructure.CurrentPrizing += 25;
             var query = inputs[0]?.ToString() ?? string.Empty;
             var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
             var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
@@ -273,6 +280,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
 
             var responseString = await CallLlama270bApiAsync(query, stopWords, maxNewTokens, topP, temperature, returnFullText);
+
+            var tokens = programStructure.CountTokens(responseString + query);
+            programStructure.HasTokens(tokens * 0.04);
+            programStructure.CurrentPrizing += (int)(tokens * 0.04);
+
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
@@ -333,10 +345,13 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(15);
-            programStructure.CurrentPrizing += 15;
             var query = inputs[0].ToString();
             var responseString = await CallCodeLlama34bApiAsync(query);
+
+            var tokens = programStructure.CountTokens(responseString + query);
+            programStructure.HasTokens(tokens * 0.025);
+            programStructure.CurrentPrizing += (int)(tokens * 0.025);
+
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
