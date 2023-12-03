@@ -280,6 +280,36 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
+    public class StringExtractor : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            var mainString = inputs[0].ToString();
+            var startDelimiter = inputs[1].ToString();
+            var endDelimiter = inputs[2].ToString();
+
+            var extractedString = ExtractSubstring(mainString, startDelimiter, endDelimiter);
+
+            programStructure.InputValues[Outputs[0].Id] = extractedString;
+        }
+
+        private string ExtractSubstring(string input, string start, string end)
+        {
+            var startIndex = input.IndexOf(start);
+            if (startIndex != -1)
+            {
+                startIndex += start.Length;
+                var endIndex = input.IndexOf(end, startIndex);
+                if (endIndex != -1)
+                {
+                    return input.Substring(startIndex, endIndex - startIndex);
+                }
+            }
+            return string.Empty;
+        }
+    }
+
+
     //public class WordCountBlock : Block
     //{
     //    public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)

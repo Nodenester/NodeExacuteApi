@@ -387,6 +387,8 @@ namespace NodeBaseApi.Version2
                 {
                     foreach (ProgramBlock pb in ProgramBlocks)
                     {
+                        List<Action> actions = new List<Action>();
+
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
                             if(CurrentTrigger != pb.LastTrigger)
@@ -395,6 +397,9 @@ namespace NodeBaseApi.Version2
                                 pb.LastTrigger = CurrentTrigger;
                             }
                         }
+
+                        var tasks = actions.Select(action => Task.Run(action));
+                        await Task.WhenAll(tasks);
                     }
                     if (InputValues.ContainsKey(inputId))
                     {
