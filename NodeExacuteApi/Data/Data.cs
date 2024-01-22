@@ -74,7 +74,7 @@ namespace NodeBaseApi.Version2
         public double CountTokens(string text)
         {
             int characterCount = text.Length;
-            return (characterCount / 4.5) / 10;
+            return (characterCount / 4.5) * 3;
         }
 
         public void AddProgramInput(Output output)
@@ -387,19 +387,19 @@ namespace NodeBaseApi.Version2
                 {
                     foreach (ProgramBlock pb in ProgramBlocks)
                     {
-                        List<Action> actions = new List<Action>();
-
                         if (pb.Block.Outputs != null && pb.Block.Outputs.Any(output => output.Id == inputId) && !pb.Block.Outputs.Any(o => o.Type == Type.Trigger))
                         {
-                            if(CurrentTrigger != pb.LastTrigger)
+                            // Define a new list of tasks for each ProgramBlock
+                            List<Task> tasks = new List<Task>();
+                            if (CurrentTrigger != pb.LastTrigger)
                             {
-                                await ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId);
+                                // Add the task to the list without awaiting it here
+                                tasks.Add(ExecuteBlockAndConnectedAsync(Guid.Empty, pb, sessionId));
                                 pb.LastTrigger = CurrentTrigger;
                             }
+                            // Await all tasks for the current ProgramBlock
+                            await Task.WhenAll(tasks);
                         }
-
-                        var tasks = actions.Select(action => Task.Run(action));
-                        await Task.WhenAll(tasks);
                     }
                     if (InputValues.ContainsKey(inputId))
                     {

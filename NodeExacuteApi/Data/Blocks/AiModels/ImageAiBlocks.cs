@@ -114,19 +114,39 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             programStructure.CurrentPrizing += 5;
             try
             {
-                byte[] imageData = Convert.FromBase64String(inputs[0]?.ToString());
+                byte[] imageData;
+
+                if (inputs[0] is string base64String)
+                {
+                    // If the input is a Base64 string, convert it to a byte array
+                    imageData = Convert.FromBase64String(base64String);
+                }
+                else if (inputs[0] is byte[] byteArray)
+                {
+                    // If the input is already a byte array, use it directly
+                    imageData = byteArray;
+                }
+                else
+                {
+                    throw new ArgumentException("Input is not a valid byte array or Base64 string.");
+                }
+
                 var caption = await CallImageCaptioningApiAsync(imageData);
                 programStructure.InputValues[Outputs[0].Id] = caption;
             }
             catch (FormatException ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine("Base64 string format error: " + ex.Message);
+            }
+            catch (ArgumentException ex)
+            {
+                Console.WriteLine("Input argument error: " + ex.Message);
             }
         }
 
         private async Task<string> CallImageCaptioningApiAsync(byte[] imageData)
         {
-            var apiUrl = "https://api-inference.huggingface.co/models/nlpconnect/vit-gpt2-image-captioning";
+            var apiUrl = "https://api-inference.huggingface.co/models/Salesforce/blip-image-captioning-large";
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
 
@@ -232,8 +252,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(5);
-            programStructure.CurrentPrizing += 5;
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             var imageData = await CallImageGenerationApiAsync(inputs[0].ToString());
             programStructure.InputValues[Outputs[0].Id] = imageData;
         }
@@ -270,8 +290,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(20);
+            programStructure.CurrentPrizing += 20;
             var imageData = await CallImageGenerationApiAsync2(inputs[0].ToString());
             programStructure.InputValues[Outputs[0].Id] = imageData;
         }
@@ -342,24 +362,25 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             }
         }
 
-        private string ProcessExtractedText(string rawText)
+        private List<string> ProcessExtractedText(string rawText)
         {
-            // Remove all tag-like elements
-            var cleanedText = Regex.Replace(rawText, "<[^>]*>", "");
+            // Extracting text inside the tags and removing the tags
+            var matches = Regex.Matches(rawText, "<s_.*?>(.*?)</s_.*?>");
+            var result = new List<string>();
 
-            // Further processing to filter out nonsensical text
-            // This is a basic example and might need refinement based on observed output patterns
-            var sensibleText = new StringBuilder();
-            var words = cleanedText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (var word in words)
+            foreach (Match match in matches)
             {
-                if (!word.StartsWith("@") && word.Length > 1) // Basic check to filter out nonsensical parts
+                if (match.Groups.Count > 1)
                 {
-                    sensibleText.Append(word + " ");
+                    string text = match.Groups[1].Value.Trim();
+                    if (!string.IsNullOrEmpty(text))
+                    {
+                        result.Add(text);
+                    }
                 }
             }
 
-            return sensibleText.ToString().Trim();
+            return result;
         }
     }
 }

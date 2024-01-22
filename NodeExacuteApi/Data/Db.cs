@@ -259,10 +259,10 @@ namespace NodeBaseApi.Version2
                 if (isApiKey)
                 {
                     var userIdQuery = @"
-                        SELECT UserId 
-                        FROM Ludde.UserApiKeys
-                        WHERE ApiKey = @ApiKey;
-                    ";
+                SELECT UserId 
+                FROM Ludde.UserApiKeys
+                WHERE ApiKey = @ApiKey;
+            ";
                     var userId = await connection.QuerySingleOrDefaultAsync<Guid>(userIdQuery, new { ApiKey = identifier });
 
                     if (userId == default(Guid))
@@ -272,14 +272,14 @@ namespace NodeBaseApi.Version2
                 }
 
                 var tokensQuery = @"
-                    SELECT Tokens
+                    SELECT (Tokens + BoughtTokens) AS TotalTokens
                     FROM Ludde.TokenWallet
                     WHERE UserId = @UserId;
                 ";
                 return await connection.QuerySingleOrDefaultAsync<int>(tokensQuery, new { UserId = identifier });
             }
         }
-        public async Task UpdateUserTokensAsync(Guid identifier, int tokens, bool isApiKey = true)
+        public async Task UpdateUserTokensAsync(Guid identifier, int tokensToDeduct, bool isApiKey = true)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -299,11 +299,32 @@ namespace NodeBaseApi.Version2
                 }
 
                 var updateTokensQuery = @"
-                    UPDATE Ludde.TokenWallet
-                    SET Tokens = @Tokens
+                    DECLARE @Tokens INT;
+                    DECLARE @BoughtTokens INT;
+
+                    SELECT @Tokens = Tokens, @BoughtTokens = BoughtTokens
+                    FROM Ludde.TokenWallet
                     WHERE UserId = @UserId;
+
+                    IF (@Tokens >= @TokensToDeduct)
+                    BEGIN
+                        UPDATE Ludde.TokenWallet
+                        SET Tokens = @Tokens - @TokensToDeduct
+                        WHERE UserId = @UserId;
+                    END
+                    ELSE
+                    BEGIN
+                        SET @TokensToDeduct = @TokensToDeduct - @Tokens;
+                        UPDATE Ludde.TokenWallet
+                        SET Tokens = 0, 
+                            BoughtTokens = CASE 
+                                             WHEN @BoughtTokens >= @TokensToDeduct THEN @BoughtTokens - @TokensToDeduct
+                                             ELSE 0 
+                                           END
+                        WHERE UserId = @UserId;
+                    END
                 ";
-                await connection.ExecuteAsync(updateTokensQuery, new { UserId = identifier, Tokens = tokens });
+                await connection.ExecuteAsync(updateTokensQuery, new { UserId = identifier, TokensToDeduct = tokensToDeduct });
             }
         }
     }
