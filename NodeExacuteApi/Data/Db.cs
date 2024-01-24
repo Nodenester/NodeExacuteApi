@@ -162,7 +162,6 @@ namespace NodeBaseApi.Version2
                 }
             }
         }
-
         public async Task<bool> UpdateSessionAsync(Session session)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -201,7 +200,6 @@ namespace NodeBaseApi.Version2
                 }
             }
         }
-
         public async Task<Session> GetSessionAsync(string sessionId)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -254,29 +252,50 @@ namespace NodeBaseApi.Version2
         }
         public async Task<int> GetUserTokensAsync(Guid identifier, bool isApiKey = true)
         {
-            using (var connection = new SqlConnection(_connectionString))
+            try
             {
-                if (isApiKey)
+                using (var connection = new SqlConnection(_connectionString))
                 {
-                    var userIdQuery = @"
-                SELECT UserId 
-                FROM Ludde.UserApiKeys
-                WHERE ApiKey = @ApiKey;
-            ";
-                    var userId = await connection.QuerySingleOrDefaultAsync<Guid>(userIdQuery, new { ApiKey = identifier });
+                    if (isApiKey)
+                    {
+                        var userIdQuery = @"
+                            SELECT UserId 
+                            FROM Ludde.UserApiKeys
+                            WHERE ApiKey = @ApiKey;
+                        ";
+                        var userId = await connection.QuerySingleOrDefaultAsync<Guid>(userIdQuery, new { ApiKey = identifier });
 
-                    if (userId == default(Guid))
-                        throw new InvalidOperationException("Invalid ApiKey provided.");
+                        if (userId == default(Guid))
+                            throw new InvalidOperationException("Invalid ApiKey provided.");
 
-                    identifier = userId;
+                        identifier = userId;
+                    }
+
+                    var tokensQuery = @"
+                            SELECT COALESCE(Tokens, 0) + COALESCE(BoughtTokens, 0) AS TotalTokens
+                            FROM Ludde.TokenWallet
+                            WHERE UserId = @UserId;
+                        ";
+                    return await connection.QuerySingleOrDefaultAsync<int>(tokensQuery, new { UserId = identifier });
                 }
-
-                var tokensQuery = @"
-                    SELECT (Tokens + BoughtTokens) AS TotalTokens
-                    FROM Ludde.TokenWallet
-                    WHERE UserId = @UserId;
-                ";
-                return await connection.QuerySingleOrDefaultAsync<int>(tokensQuery, new { UserId = identifier });
+            }
+            catch (SqlException ex)
+            {
+                // Handle SQL-specific errors
+                // Log the error, rethrow, or handle as needed
+                throw new ApplicationException("A database error occurred.", ex);
+            }
+            catch (InvalidOperationException ex)
+            {
+                // Handle invalid operations, like invalid API key
+                // This can also be handled specifically outside this block if needed
+                throw; // Rethrows the current exception
+            }
+            catch (Exception ex)
+            {
+                // Handle other exceptions
+                // Log and handle or rethrow
+                throw new ApplicationException("An error occurred in GetUserTokensAsync.", ex);
             }
         }
         public async Task UpdateUserTokensAsync(Guid identifier, int tokensToDeduct, bool isApiKey = true)

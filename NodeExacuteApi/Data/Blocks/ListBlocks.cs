@@ -112,16 +112,45 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            List<Object> list = new List<Object>((IEnumerable<Object>)inputs[0]);
-
-            if (list == null)
+            try
             {
-                list = new List<object>();
-                return;
-            }
-            var Count = list.Count();
+                List<object> list = new List<object>();
+                var Count = 0;
 
-            programStructure.InputValues[Outputs[0].Id] = Count;
+                // Check if the input is a JsonElement
+                if (inputs[0] is System.Text.Json.JsonElement jsonElement)
+                {
+                    var json = jsonElement.GetRawText();
+                    var nestedList = System.Text.Json.JsonSerializer.Deserialize<List<List<object>>>(json);
+
+                    if (nestedList == null || !nestedList.Any())
+                    {
+                        Count = 0;
+                    }
+
+                    list = nestedList.SelectMany(innerList => innerList).ToList();
+                }
+                else if (inputs[0] is IEnumerable<object> enumerable)
+                {
+                    list = new List<object>(enumerable);
+                }
+                else
+                {
+                    Count = 0;
+                }
+
+                if (list == null)
+                {
+                    Count = 0;
+                }
+
+                Count = list.Count;
+                programStructure.InputValues[Outputs[0].Id] = Count;
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
         }
     }
 

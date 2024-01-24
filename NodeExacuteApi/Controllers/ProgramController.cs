@@ -135,7 +135,7 @@ namespace NodeExacuteApi.Controllers
             }
             catch (Exception ex)
             {
-                int tokensLeft = program.ProgramStructure.MaxPrice - program.ProgramStructure.CurrentPrizing;
+                int tokensLeft = program.ProgramStructure.CurrentPrizing;
                 await _dbConnection.UpdateUserTokensAsync(apiKey, tokensLeft, !isTest);
                 return StatusCode(500, new { error = $"Error executing program: {ex.Message}" });
             }
@@ -184,7 +184,7 @@ namespace NodeExacuteApi.Controllers
 
             try
             {
-                int tokensLeft = program.ProgramStructure.MaxPrice - program.ProgramStructure.CurrentPrizing;
+                int tokensLeft = program.ProgramStructure.CurrentPrizing;
                 await _dbConnection.InsertCallAsync(call);
                 await _dbConnection.UpdateUserTokensAsync(apiKey, tokensLeft, !isTest);
             }
