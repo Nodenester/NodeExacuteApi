@@ -75,27 +75,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         }
     }
 
-    public class DALLEBlock : Block
-    {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
-        {
-            var apiKey = inputs[0].ToString();
-            var prompt = inputs[1].ToString();
-
-            var api = new OpenAI_API.OpenAIAPI(apiKey);
-            var result = await api.ImageGenerations.CreateImageAsync(prompt); 
-            var byteArray = Convert.FromBase64String(result.Data.FirstOrDefault().Base64Data);  
-
-            // Convert byte array to Image
-            using (MemoryStream ms = new MemoryStream(byteArray))
-            {
-                Image generatedImage = Image.FromStream(ms);
-
-                programStructure.InputValues[Outputs[0].Id] = generatedImage;
-            }
-        }
-    }
-
     //public class WhisperASRBlock : Block
     //{
     //    public WhisperASRBlock()

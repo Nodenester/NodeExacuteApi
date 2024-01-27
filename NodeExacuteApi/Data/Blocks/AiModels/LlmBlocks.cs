@@ -347,8 +347,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
+            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; 
+            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; 
             var temperature = inputs.Count > 3 && inputs[3] is JObject jsonObj && jsonObj["value"] is IConvertible convertible ? Convert.ToDouble(convertible) : 0.6;
             var returnFullText = inputs.Count > 5 && inputs[5] is bool boolValue ? boolValue : false;
 
@@ -429,22 +429,61 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            var query = inputs[0].ToString();
-            var responseString = await CallCodeLlama34bApiAsync(query);
+            var query = inputs[0]?.ToString() ?? string.Empty;
+            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
+            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
+            var temperature = inputs.Count > 3 && inputs[3] is JObject jsonObj && jsonObj["value"] is IConvertible convertible ? Convert.ToDouble(convertible) : 0.6;
+            var returnFullText = inputs.Count > 5 && inputs[5] is bool boolValue ? boolValue : false;
+
+            // Safely handling the stopwords input
+            var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
+            var stopWords = new List<string>();
+            if (stopWordsInput != null)
+            {
+                if (stopWordsInput is List<object> stopWordsObjectList)
+                {
+                    stopWords = stopWordsObjectList.Select(obj => obj.ToString()).ToList();
+                }
+            }
+
+            var responseString = await CallCodeLlama34bApiAsync(query, stopWords, maxNewTokens, topP, temperature, returnFullText);
 
             var tokens = programStructure.CountTokens(responseString + query);
-            programStructure.HasTokens(tokens * 0.025);
+            programStructure.HasTokens(tokens * 0.025); // Adjusted token pricing as per CodeLlama's specific token pricing strategy
             programStructure.CurrentPrizing += (int)(tokens * 0.025);
 
             programStructure.InputValues[Outputs[0].Id] = responseString;
         }
 
-        private async Task<string> CallCodeLlama34bApiAsync(string query)
+        private async Task<string> CallCodeLlama34bApiAsync(string query, List<string> stopWords, int maxNewTokens = 1024, double topP = 0.8, double temperature = 0.6, bool returnFullText = false)
         {
             var url = "https://api-inference.huggingface.co/models/codellama/CodeLlama-34b-Instruct-hf";
+            object parameters;
+            if (stopWords.Count == 0 || (stopWords.Count == 1 && stopWords[0] == ""))
+            {
+                parameters = new
+                {
+                    max_new_tokens = maxNewTokens,
+                    top_p = topP,
+                    temperature = temperature,
+                    return_full_text = returnFullText
+                };
+            }
+            else
+            {
+                parameters = new
+                {
+                    max_new_tokens = maxNewTokens,
+                    top_p = topP,
+                    temperature = temperature,
+                    return_full_text = returnFullText,
+                    stop = stopWords
+                };
+            }
             var payload = new
             {
-                inputs = query
+                inputs = query, // Consider formatting inputs if needed by CodeLlama API
+                parameters
             };
             var content = new StringContent(JsonConvert.SerializeObject(payload), Encoding.UTF8, "application/json");
             var client = new HttpClient();
@@ -458,10 +497,9 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 var responseContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<dynamic>(responseContent);
 
-                // Assuming the response format is similar to the previous API
-                var generatedText = jsonResponse[0].generated_text.ToString();
+                var generatedText = jsonResponse[0]?.generated_text?.ToString();
 
-                return generatedText;
+                return generatedText ?? string.Empty;
             }
             else
             {
