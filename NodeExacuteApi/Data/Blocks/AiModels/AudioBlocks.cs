@@ -58,21 +58,21 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(20);
-            programStructure.CurrentPrizing += 20;
+            programStructure.HasTokens(10);
+            programStructure.CurrentPrizing += 10;
             string textInput = inputs[0].ToString();
-            string voicePreset = inputs.Count > 1 ? inputs[1].ToString() : null;
+            //string voicePreset = inputs.Count > 1 ? inputs[1].ToString() : null;
 
-            byte[] audioData = await CallBarkApiAsync(textInput, voicePreset);
+            byte[] audioData = await CallBarkApiAsync(textInput);
 
             var tokens = programStructure.CountTokens(textInput);
-            programStructure.HasTokens(tokens * 0.01);
-            programStructure.CurrentPrizing += (int)(tokens * 0.01);
+            programStructure.HasTokens(tokens * 0.02);
+            programStructure.CurrentPrizing += (int)(tokens * 0.02);
 
             programStructure.InputValues[Outputs[0].Id] = audioData;
         }
 
-        private async Task<byte[]> CallBarkApiAsync(string text, string voicePreset)
+        private async Task<byte[]> CallBarkApiAsync(string text)
         {
             var client = new HttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
@@ -80,10 +80,9 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             var data = new
             {
                 inputs = text,
-                voice_preset = voicePreset
             };
             var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/suno/bark", content);
+            var response = await client.PostAsync("https://api-inference.huggingface.co/models/facebook/mms-tts-eng", content);
 
             if (response.IsSuccessStatusCode)
             {
