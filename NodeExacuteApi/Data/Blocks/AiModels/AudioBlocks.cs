@@ -90,8 +90,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
             string textInput = inputs[0].ToString();
             //string voicePreset = inputs.Count > 1 ? inputs[1].ToString() : null;
 
@@ -132,8 +130,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(20);
+            programStructure.CurrentPrizing += 20;
             string prompt = inputs[0].ToString();
             byte[] musicData = await CallMusicGenApiAsync(prompt);
             programStructure.InputValues[Outputs[0].Id] = musicData;
@@ -164,8 +162,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            programStructure.HasTokens(10);
-            programStructure.CurrentPrizing += 10;
+            programStructure.HasTokens(20);
+            programStructure.CurrentPrizing += 20;
             byte[] audioData = null;
 
             // Check if the input is a byte array and assign it directly.
