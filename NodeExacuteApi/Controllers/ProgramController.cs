@@ -33,7 +33,7 @@ namespace NodeExacuteApi.Controllers
 
             if (apiKey == Guid.Empty)
             {
-                return BadRequest(new { error = "Invalid API key." });
+                return BadRequest(new { error = "No API key." });
             }
 
             if (inputValues == null || inputValues.Count == 0)
