@@ -110,7 +110,7 @@ namespace NodeBaseApi.Version2
             {
                 var query = @"
                 SELECT COUNT(1)
-                FROM Ludde.programs
+                FROM Ludde.ApiKeys
                 WHERE ApiKey = @ApiKey;
             ";
 
