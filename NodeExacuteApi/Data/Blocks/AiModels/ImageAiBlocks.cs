@@ -10,6 +10,7 @@ using System.Net.Http.Headers;
 using System.Drawing.Imaging;
 using System.Drawing;
 using System.Text.RegularExpressions;
+using System.Text.Json;
 
 namespace NodeExacuteApi.Data.Blocks.AiModels
 {
@@ -118,12 +119,15 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
                 if (inputs[0] is string base64String)
                 {
-                    // If the input is a Base64 string, convert it to a byte array
                     imageData = Convert.FromBase64String(base64String);
+                }
+                else if (inputs[0] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.String)
+                {
+                    var base64String2 = jsonElement.GetString();
+                    imageData = Convert.FromBase64String(base64String2);
                 }
                 else if (inputs[0] is byte[] byteArray)
                 {
-                    // If the input is already a byte array, use it directly
                     imageData = byteArray;
                 }
                 else
