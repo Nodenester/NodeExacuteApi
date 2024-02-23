@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using NodeBaseApi.Version2;
 using System.Text;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using Type = NodeBaseApi.Version2.Type;
 
@@ -94,9 +95,23 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
         {
-            var strings = ((List<object>)inputs[0]).ConvertAll(input => input.ToString());
-            var resultantString = string.Join(inputs[1].ToString(), strings);
-            programStructure.InputValues[Outputs[0].Id] = resultantString;
+            if (inputs[0] is JsonElement jsonElement && jsonElement.ValueKind == JsonValueKind.Array)
+            {
+                var strings = new List<object>();
+                foreach (var element in jsonElement.EnumerateArray())
+                {
+                    // Convert each element to string for now; adjust based on actual needs
+                    strings.Add(element.ToString());
+                }
+                var separator = inputs[1].ToString();
+                var resultantString = string.Join(separator, strings);
+                programStructure.InputValues[Outputs[0].Id] = resultantString;
+            }
+            else
+            {
+                // Handle the case where inputs[0] is not a JSON array as expected
+            }
+
         }
     }
 

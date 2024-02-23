@@ -194,7 +194,6 @@ namespace NodeExacuteApi.Controllers
             }
 
             // Get the output values from the program and return them as JSON;
-
             var convertedOutput = new List<object>();
             foreach (var output in ProgramOutput)
             {

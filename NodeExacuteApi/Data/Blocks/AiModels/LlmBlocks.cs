@@ -15,10 +15,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
-            var temperature = inputs.Count > 3 && inputs[3] != null ? Convert.ToDouble(inputs[3]) : 0.6; // default value if null
-            var returnFullText = inputs.Count > 5 && inputs[5] != null ? Convert.ToBoolean(inputs[5]) : false; // default value if null
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
@@ -98,10 +98,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
-            var temperature = inputs.Count > 3 && inputs[3] != null ? Convert.ToDouble(inputs[3]) : 0.6; // default value if null
-            var returnFullText = inputs.Count > 5 && inputs[5] != null ? Convert.ToBoolean(inputs[5]) : false; // default value if null
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
@@ -181,10 +181,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
-            var temperature = inputs.Count > 3 && inputs[3] != null ? Convert.ToDouble(inputs[3]) : 0.6; // default value if null
-            var returnFullText = inputs.Count > 5 && inputs[5] != null ? Convert.ToBoolean(inputs[5]) : false; // default value if null
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
@@ -264,10 +264,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
-            var temperature = inputs.Count > 3 && inputs[3] != null ? Convert.ToDouble(inputs[3]) : 0.6; // default value if null
-            var returnFullText = inputs.Count > 5 && inputs[5] != null ? Convert.ToBoolean(inputs[5]) : false; // default value if null
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
@@ -347,10 +347,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; 
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; 
-            var temperature = inputs.Count > 3 && inputs[3] is JObject jsonObj && jsonObj["value"] is IConvertible convertible ? Convert.ToDouble(convertible) : 0.6;
-            var returnFullText = inputs.Count > 5 && inputs[5] is bool boolValue ? boolValue : false;
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
@@ -430,10 +430,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             var query = inputs[0]?.ToString() ?? string.Empty;
-            var maxNewTokens = inputs.Count > 1 && inputs[1] != null ? Convert.ToInt32(inputs[1]) : 1024; // default value if null
-            var topP = inputs.Count > 2 && inputs[2] != null ? Convert.ToDouble(inputs[2]) : 0.8; // default value if null
-            var temperature = inputs.Count > 3 && inputs[3] is JObject jsonObj && jsonObj["value"] is IConvertible convertible ? Convert.ToDouble(convertible) : 0.6;
-            var returnFullText = inputs.Count > 5 && inputs[5] is bool boolValue ? boolValue : false;
+            var maxNewTokens = inputs.Count > 1 ? (inputs[1] as JValue)?.Value<int?>() ?? 1024 : 1024;
+            var topP = inputs.Count > 2 ? (inputs[2] as JValue)?.Value<double?>() ?? 0.8 : 0.8;
+            var temperature = inputs.Count > 3 ? ((inputs[3] as JObject)?["value"] as JValue)?.Value<double?>() ?? 0.6 : 0.6;
+            var returnFullText = inputs.Count > 5 ? inputs[5] as bool? ?? false : false;
 
             // Safely handling the stopwords input
             var stopWordsInput = inputs.Count > 4 ? inputs[4] : null;
