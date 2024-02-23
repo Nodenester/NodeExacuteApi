@@ -244,7 +244,7 @@ namespace NodeBaseApi.Version2
             {
                 var query = @"
                     SELECT UserId 
-                    FROM Ludde.UserApiKeys
+                    FROM Ludde.ApiKeys
                     WHERE ApiKey = @ApiKey;
                 ";
                 return await connection.QuerySingleOrDefaultAsync<Guid>(query, new { ApiKey });
@@ -260,13 +260,15 @@ namespace NodeBaseApi.Version2
                     {
                         var userIdQuery = @"
                             SELECT UserId 
-                            FROM Ludde.UserApiKeys
+                            FROM Ludde.ApiKeys
                             WHERE ApiKey = @ApiKey;
                         ";
-                        var userId = await connection.QuerySingleOrDefaultAsync<Guid>(userIdQuery, new { ApiKey = identifier });
 
-                        if (userId == default(Guid))
+                        var userIdString = await connection.QuerySingleOrDefaultAsync<string>(userIdQuery, new { ApiKey = identifier });
+                        if (string.IsNullOrEmpty(userIdString))
                             throw new InvalidOperationException("Invalid ApiKey provided.");
+
+                        var userId = Guid.Parse(userIdString);
 
                         identifier = userId;
                     }
@@ -306,13 +308,14 @@ namespace NodeBaseApi.Version2
                 {
                     var userIdQuery = @"
                         SELECT UserId 
-                        FROM Ludde.UserApiKeys
+                        FROM Ludde.ApiKeys
                         WHERE ApiKey = @ApiKey;
                     ";
-                    var userId = await connection.QuerySingleOrDefaultAsync<Guid>(userIdQuery, new { ApiKey = identifier });
-
-                    if (userId == default(Guid))
+                    var userIdString = await connection.QuerySingleOrDefaultAsync<string>(userIdQuery, new { ApiKey = identifier });
+                    if (string.IsNullOrEmpty(userIdString))
                         throw new InvalidOperationException("Invalid ApiKey provided.");
+
+                    var userId = Guid.Parse(userIdString);
 
                     identifier = userId;
                 }
