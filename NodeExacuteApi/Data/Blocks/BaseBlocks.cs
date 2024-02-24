@@ -55,6 +55,15 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
+    //Trigger OR
+    public class OrTrigger : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        {
+
+        }
+    }
+
     //Variable handeling
     public class SetVariable : Block
     {
