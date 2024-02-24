@@ -133,4 +133,44 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
+    public class AudioOverlay : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            byte[] audioData1 = (byte[])inputs[0];
+            byte[] audioData2 = (byte[])inputs[1];
+
+            using (var ms1 = new MemoryStream(audioData1))
+            using (var ms2 = new MemoryStream(audioData2))
+            using (var reader1 = new NAudio.Wave.WaveFileReader(ms1))
+            using (var reader2 = new NAudio.Wave.WaveFileReader(ms2))
+            using (var mixer = new NAudio.Wave.WaveMixerStream32())
+            using (var outputStream = new MemoryStream())
+            {
+                mixer.AutoStop = false;
+
+                var waveStream1 = new NAudio.Wave.WaveChannel32(reader1);
+                var waveStream2 = new NAudio.Wave.WaveChannel32(reader2);
+
+                mixer.AddInputStream(waveStream1);
+                mixer.AddInputStream(waveStream2);
+
+                // Adjusting to the same volume level for consistency
+                waveStream1.Volume = waveStream2.Volume = 0.5f;
+
+                using (var waveOut = new NAudio.Wave.WaveFileWriter(outputStream, mixer.WaveFormat))
+                {
+                    byte[] buffer = new byte[1024];
+                    int read;
+                    while ((read = mixer.Read(buffer, 0, buffer.Length)) > 0)
+                    {
+                        waveOut.Write(buffer, 0, read);
+                    }
+                }
+
+                byte[] outputAudioData = outputStream.ToArray();
+                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+            }
+        }
+    }
 }

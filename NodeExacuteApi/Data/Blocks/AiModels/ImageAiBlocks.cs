@@ -264,7 +264,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
         private async Task<byte[]> CallImageGenerationApiAsync(string textPrompt)
         {
-            var apiUrl = "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5";
+            var apiUrl = "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0";
             //var apiUrl = "https://api-inference.huggingface.co/models/openskyml/dalle-3-xl";
 
             var client = new HttpClient();
