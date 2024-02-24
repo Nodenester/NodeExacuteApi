@@ -306,6 +306,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             var apiUrl = "https://api-inference.huggingface.co/models/openskyml/dalle-3-xl";
 
             var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(360);
+
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
 
             var requestData = new { inputs = textPrompt };
