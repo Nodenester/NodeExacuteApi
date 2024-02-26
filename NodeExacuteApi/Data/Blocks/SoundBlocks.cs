@@ -47,31 +47,38 @@ namespace NodeExacuteApi.Data.Blocks
         }
     }
 
-    //public class AudioTrimming : Block
-    //{
-    //    public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
-    //    {
-    //        byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
-    //        double startTime = Convert.ToDouble(inputs[1]);
-    //        double endTime = Convert.ToDouble(inputs[2]);
-    //        MemoryStream outputStream = new MemoryStream();
+    public class AudioTrimming : Block
+    {
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+        {
+            byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
+            double startTime = Convert.ToDouble(inputs[1]);
+            double endTime = Convert.ToDouble(inputs[2]);
+            MemoryStream outputStream = new MemoryStream();
 
-    //        using (var ms = new MemoryStream(audioData))
-    //        using (var reader = new AudioFileReader(ms)) // Correct usage of MemoryStream with AudioFileReader
-    //        {
-    //            var trimmed = new OffsetSampleProvider(reader)
-    //            {
-    //                SkipOver = TimeSpan.FromSeconds(startTime),
-    //                Take = TimeSpan.FromSeconds(endTime - startTime)
-    //            };
+            // The key change is here: We directly use the MemoryStream that contains the audio data
+            using (var ms = new MemoryStream(audioData))
+            using (var reader = new WaveFileReader(ms)) // This should now work as intended
+            {
+                if (endTime <= startTime)
+                {
+                    throw new ArgumentException("endTime must be greater than startTime");
+                }
 
-    //            WaveFileWriter.WriteWavFileToStream(outputStream, new SampleToWaveProvider(trimmed)); // Potential issue here
-    //        }
+                var trimmed = new OffsetSampleProvider(reader.ToSampleProvider())
+                {
+                    SkipOver = TimeSpan.FromSeconds(startTime),
+                    Take = TimeSpan.FromSeconds(endTime - startTime)
+                };
 
-    //        byte[] outputAudioData = outputStream.ToArray();
-    //        programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-    //    }
-    //}
+                // Convert back to wave for writing
+                WaveFileWriter.WriteWavFileToStream(outputStream, new SampleToWaveProvider(trimmed));
+            }
+
+            byte[] outputAudioData = outputStream.ToArray();
+            programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+        }
+    }
 
     public class AudioAmplification : Block
     {
@@ -136,7 +143,6 @@ namespace NodeExacuteApi.Data.Blocks
             programStructure.InputValues[Outputs[0].Id] = mixedAudioData;
         }
     }
-
 
     public static class AudioConverter
     {
