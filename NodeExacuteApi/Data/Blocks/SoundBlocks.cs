@@ -2,134 +2,106 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Drawing;
-using NAudio.Wave;
 using NodeBaseApi.Version2;
 using Type = NodeBaseApi.Version2.Type;
+using FlacLibSharp;
+using NAudio;
+using NAudio.Flac;
+using LibVLCSharp;
+using NAudio.Wave;
+using NAudio.Wave.SampleProviders;
 
 namespace NodeExacuteApi.Data.Blocks
 {
     public class AudioLength : Block
     {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
             byte[] audioData = (byte[])inputs[0];
-            using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            {
-                double lengthInSeconds = reader.TotalTime.TotalSeconds;
-                programStructure.InputValues[Outputs[0].Id] = lengthInSeconds;
-            }
+
+            // Decode the FLAC audio data
+            FlacFile flacStream = new FlacFile(new MemoryStream(audioData));
+            var duration = flacStream.StreamInfo.Duration;
+
+            programStructure.InputValues[Outputs[0].Id] = duration;
         }
     }
 
     public class AudioVolumeChange : Block
     {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            byte[] audioData = (byte[])inputs[0];
+            byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
             float volume = (float)Convert.ToDouble(inputs[1]);
+            MemoryStream outputStream = new MemoryStream(); // This will hold the output audio data
+
             using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            using (var volumeStream = new NAudio.Wave.WaveChannel32(reader) { Volume = volume })
-            using (var outputStream = new MemoryStream())
-            using (var writer = new NAudio.Wave.WaveFileWriter(outputStream, volumeStream.WaveFormat))
+            using (var reader = new WaveFileReader(ms)) // Now assuredly for WAV files
             {
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = volumeStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    writer.Write(buffer, 0, read);
-                }
-                byte[] outputAudioData = outputStream.ToArray();
-                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+                var volumeProvider = new VolumeWaveProvider16(reader) { Volume = volume };
+                WaveFileWriter.WriteWavFileToStream(outputStream, volumeProvider);
             }
+
+            byte[] outputAudioData = outputStream.ToArray();
+            programStructure.InputValues[Outputs[0].Id] = outputAudioData; // Return the modified audio data
         }
     }
 
-    public class AudioConversion : Block
-    {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
-        {
-            byte[] audioData = (byte[])inputs[0];
-            string targetFormat = (string)inputs[1];
-            using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            using (var outputStream = new MemoryStream())
-            {
-                if (targetFormat.ToUpper() == "MP3")
-                {
-                    using (var writer = new NAudio.Lame.LameMP3FileWriter(outputStream, reader.WaveFormat, NAudio.Lame.LAMEPreset.STANDARD))
-                    {
-                        reader.CopyTo(writer);
-                    }
-                }
-                else if (targetFormat.ToUpper() == "WAV")
-                {
-                    using (var writer = new NAudio.Wave.WaveFileWriter(outputStream, reader.WaveFormat))
-                    {
-                        reader.CopyTo(writer);
-                    }
-                }
-                else
-                {
-                    throw new ArgumentException("Unsupported audio format.");
-                }
+    //public class AudioTrimming : Block
+    //{
+    //    public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
+    //    {
+    //        byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
+    //        double startTime = Convert.ToDouble(inputs[1]);
+    //        double endTime = Convert.ToDouble(inputs[2]);
+    //        MemoryStream outputStream = new MemoryStream();
 
-                byte[] outputAudioData = outputStream.ToArray();
-                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-            }
-        }
-    }
+    //        using (var ms = new MemoryStream(audioData))
+    //        using (var reader = new AudioFileReader(ms)) // Correct usage of MemoryStream with AudioFileReader
+    //        {
+    //            var trimmed = new OffsetSampleProvider(reader)
+    //            {
+    //                SkipOver = TimeSpan.FromSeconds(startTime),
+    //                Take = TimeSpan.FromSeconds(endTime - startTime)
+    //            };
 
-    public class AudioTrimming : Block
-    {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
-        {
-            byte[] audioData = (byte[])inputs[0];
-            double startTime = Convert.ToDouble(inputs[1]);
-            double endTime = Convert.ToDouble(inputs[2]);
-            using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            using (var outputStream = new MemoryStream())
-            using (var writer = new NAudio.Wave.WaveFileWriter(outputStream, reader.WaveFormat))
-            {
-                reader.CurrentTime = TimeSpan.FromSeconds(startTime);
-                int bytesPerMillisecond = reader.WaveFormat.AverageBytesPerSecond / 1000;
-                int startBytes = (int)startTime * bytesPerMillisecond;
-                int endBytes = (int)endTime * bytesPerMillisecond;
-                int bytesToRead = endBytes - startBytes;
-                byte[] buffer = new byte[bytesToRead];
-                reader.Read(buffer, 0, bytesToRead);
-                writer.Write(buffer, 0, bytesToRead);
+    //            WaveFileWriter.WriteWavFileToStream(outputStream, new SampleToWaveProvider(trimmed)); // Potential issue here
+    //        }
 
-                byte[] outputAudioData = outputStream.ToArray();
-                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
-            }
-        }
-    }
+    //        byte[] outputAudioData = outputStream.ToArray();
+    //        programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+    //    }
+    //}
 
     public class AudioAmplification : Block
     {
-        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableid)
+        public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            byte[] audioData = (byte[])inputs[0];
+            byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
             float factor = (float)Convert.ToDouble(inputs[1]);
-            using (var ms = new MemoryStream(audioData))
-            using (var reader = new NAudio.Wave.WaveFileReader(ms))
-            using (var volumeStream = new NAudio.Wave.WaveChannel32(reader) { Volume = factor })
-            using (var outputStream = new MemoryStream())
-            using (var writer = new NAudio.Wave.WaveFileWriter(outputStream, volumeStream.WaveFormat))
-            {
-                byte[] buffer = new byte[1024];
-                int read;
-                while ((read = volumeStream.Read(buffer, 0, buffer.Length)) > 0)
-                {
-                    writer.Write(buffer, 0, read);
-                }
+            MemoryStream outputStream = new MemoryStream();
 
-                byte[] outputAudioData = outputStream.ToArray();
-                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+            using (var ms = new MemoryStream(audioData))
+            using (var reader = new WaveFileReader(ms))
+            using (var writer = new WaveFileWriter(outputStream, reader.WaveFormat))
+            {
+                var buffer = new float[reader.WaveFormat.SampleRate * reader.WaveFormat.Channels];
+                int bytesRead;
+                byte[] byteBuffer = new byte[buffer.Length * 4]; // Assuming 32-bit float samples
+                while ((bytesRead = reader.Read(byteBuffer, 0, byteBuffer.Length)) > 0)
+                {
+                    for (int i = 0; i < bytesRead / 4; i++)
+                    {
+                        float sample = BitConverter.ToSingle(byteBuffer, i * 4);
+                        sample *= factor;
+                        BitConverter.GetBytes(sample).CopyTo(byteBuffer, i * 4);
+                    }
+                    writer.Write(byteBuffer, 0, bytesRead);
+                }
             }
+
+            byte[] outputAudioData = outputStream.ToArray();
+            programStructure.InputValues[Outputs[0].Id] = outputAudioData;
         }
     }
 
@@ -137,39 +109,102 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            byte[] audioData1 = (byte[])inputs[0];
-            byte[] audioData2 = (byte[])inputs[1];
+            byte[] audioData1 = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
+            byte[] audioData2 = AudioConverter.EnsureWavFormat((byte[])inputs[1]);
+            MemoryStream outputStream = new MemoryStream();
 
-            using (var ms1 = new MemoryStream(audioData1))
-            using (var ms2 = new MemoryStream(audioData2))
-            using (var reader1 = new NAudio.Wave.WaveFileReader(ms1))
-            using (var reader2 = new NAudio.Wave.WaveFileReader(ms2))
-            using (var mixer = new NAudio.Wave.WaveMixerStream32())
-            using (var outputStream = new MemoryStream())
+            var targetFormat = WaveFormat.CreateIeeeFloatWaveFormat(16000, 1);
+
+            using (var waveStream1 = new WaveFileReader(new MemoryStream(audioData1)))
+            using (var waveStream2 = new WaveFileReader(new MemoryStream(audioData2)))
             {
-                mixer.AutoStop = false;
+                var provider1 = AudioConverter.ConvertToMatchingFormat(waveStream1, WaveFormat.CreateIeeeFloatWaveFormat(16000, 1));
+                var provider2 = AudioConverter.ConvertToMatchingFormat(waveStream2, WaveFormat.CreateIeeeFloatWaveFormat(16000, 1));
 
-                var waveStream1 = new NAudio.Wave.WaveChannel32(reader1);
-                var waveStream2 = new NAudio.Wave.WaveChannel32(reader2);
+                var mixer = new MixingWaveProvider32(new IWaveProvider[] { provider1, provider2 });
 
-                mixer.AddInputStream(waveStream1);
-                mixer.AddInputStream(waveStream2);
-
-                // Adjusting to the same volume level for consistency
-                waveStream1.Volume = waveStream2.Volume = 0.5f;
-
-                using (var waveOut = new NAudio.Wave.WaveFileWriter(outputStream, mixer.WaveFormat))
+                // Ensure the mixer outputs in 16-bit to reduce file size and compatibility
+                WaveFormat waveFormat = new WaveFormat(16000, 32, 1);
+                using (var resampler = new MediaFoundationResampler(mixer, waveFormat))
                 {
-                    byte[] buffer = new byte[1024];
-                    int read;
-                    while ((read = mixer.Read(buffer, 0, buffer.Length)) > 0)
-                    {
-                        waveOut.Write(buffer, 0, read);
-                    }
+                    resampler.ResamplerQuality = 60; // Set the quality (optional)
+                    WaveFileWriter.WriteWavFileToStream(outputStream, resampler);
                 }
+            }
 
-                byte[] outputAudioData = outputStream.ToArray();
-                programStructure.InputValues[Outputs[0].Id] = outputAudioData;
+            byte[] mixedAudioData = outputStream.ToArray();
+            programStructure.InputValues[Outputs[0].Id] = mixedAudioData;
+        }
+    }
+
+
+    public static class AudioConverter
+    {
+        public static byte[] EnsureWavFormat(byte[] audioData)
+        {
+            using (var msInput = new MemoryStream(audioData))
+            {
+                if (IsWaveFormat(msInput))
+                {
+                    return audioData; // It's already a WAV file, return it directly
+                }
+                else
+                {
+                    msInput.Position = 0; // Reset stream position after checking format
+                                          // Placeholder for actual FLAC to WAV conversion
+                    return ConvertFlacToWav(msInput); // Implement this method based on your FLAC decoding library
+                }
+            }
+        }
+
+        public static IWaveProvider ConvertToMatchingFormat(WaveFileReader waveReader, WaveFormat targetFormat)
+        {
+            // Check if conversion to IEEE float format is necessary
+            // This checks encoding explicitly alongside sample rate and channel count
+            bool needsIeeeFloatConversion = waveReader.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat ||
+                                            waveReader.WaveFormat.SampleRate != targetFormat.SampleRate ||
+                                            waveReader.WaveFormat.Channels != targetFormat.Channels;
+
+            if (needsIeeeFloatConversion)
+            {
+                // Convert to IEEE float format with target sample rate and channels
+                WaveFormat ieeeFloatFormat = WaveFormat.CreateIeeeFloatWaveFormat(targetFormat.SampleRate, targetFormat.Channels);
+                return new MediaFoundationResampler(waveReader, ieeeFloatFormat) { ResamplerQuality = 60 };
+            }
+            else
+            {
+                // Already matches the target format including IEEE float encoding, return as is
+                return waveReader;
+            }
+        }
+
+        private static bool IsWaveFormat(MemoryStream audioStream)
+        {
+            try
+            {
+                using (var reader = new WaveFileReader(audioStream))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        private static byte[] ConvertFlacToWav(MemoryStream flacStream)
+        {
+            // Assuming FlacReader is analogous to WaveFileReader for FLAC files in NAudio.Flac
+            using (var flacReader = new FlacReader(flacStream))
+            {
+                // Create a MemoryStream to hold the converted WAV data
+                using (var wavStream = new MemoryStream())
+                {
+                    WaveFileWriter.WriteWavFileToStream(wavStream, flacReader);
+
+                    return wavStream.ToArray();
+                }
             }
         }
     }

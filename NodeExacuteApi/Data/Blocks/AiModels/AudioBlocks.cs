@@ -144,7 +144,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
 
             var data = new { inputs = prompt };
             var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-            var response = await client.PostAsync("https://api-inference.huggingface.co/models/facebook/musicgen-stereo-medium", content);
+            var response = await client.PostAsync("https://api-inference.huggingface.co/models/facebook/musicgen-small", content);
 
             if (response.IsSuccessStatusCode)
             {
