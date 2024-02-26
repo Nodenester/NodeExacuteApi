@@ -17,12 +17,19 @@ namespace NodeExacuteApi.Data.Blocks
     {
         public override async Task ExecuteAsync(List<object> inputs, ProgramStructure programStructure, string sessionId, Guid variableId)
         {
-            byte[] audioData = (byte[])inputs[0];
+            // Convert input audio data to WAV format if it's not already
+            byte[] audioData = AudioConverter.EnsureWavFormat((byte[])inputs[0]);
+            TimeSpan duration;
 
-            // Decode the FLAC audio data
-            FlacFile flacStream = new FlacFile(new MemoryStream(audioData));
-            var duration = flacStream.StreamInfo.Duration;
+            // Use MemoryStream to avoid temporary files and work directly with byte arrays
+            using (var ms = new MemoryStream(audioData))
+            using (var reader = new WaveFileReader(ms)) // NAudio's WaveFileReader to handle the WAV data
+            {
+                // Obtain the duration from the WaveFileReader
+                duration = reader.TotalTime;
+            }
 
+            // Store the duration as a value in your program structure
             programStructure.InputValues[Outputs[0].Id] = duration;
         }
     }
