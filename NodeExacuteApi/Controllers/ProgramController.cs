@@ -135,7 +135,7 @@ namespace NodeExacuteApi.Controllers
             }
             catch (Exception ex)
             {
-                int tokensLeft = program.ProgramStructure.CurrentPrizing;
+                int tokensLeft = program.ProgramStructure.CurrentPrizing - 10;
                 await _dbConnection.UpdateUserTokensAsync(apiKey, tokensLeft, !isTest);
                 return StatusCode(500, new { error = $"Error executing program: {ex.Message}" });
             }
